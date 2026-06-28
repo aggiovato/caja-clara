@@ -11,6 +11,7 @@ room = "2.8.4"
 navigationCompose = "2.9.8"
 testLogger = "4.0.0"
 desugarJdkLibs = "2.1.5"
+dokka = "2.2.0"
 kotlin = "2.2.10"
 composeBom = "2026.02.01"
 ksp = "2.2.10-2.0.2"
@@ -52,4 +53,5 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 test-logger = { id = "com.adarshr.test-logger", version.ref = "testLogger" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 

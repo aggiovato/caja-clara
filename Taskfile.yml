@@ -46,6 +46,21 @@ tasks:
     cmds:
       - "{{.GRADLEW}} clean {{.GRADLE_FLAGS}}"
 
+  docs:
+    desc: Generate browsable API docs (Dokka HTML) from KDoc
+    cmds:
+      - "{{.GRADLEW}} :app:dokkaGenerate {{.GRADLE_FLAGS}}"
+      - cmd: echo "Docs at app/build/dokka/html/index.html — run 'task docs:serve' to open"
+        silent: true
+
+  docs:serve:
+    desc: Serve the generated Dokka docs at http://localhost:8000 (search works here)
+    dir: app/build/dokka/html
+    cmds:
+      - cmd: echo "Serving docs at http://localhost:8000 (Ctrl+C to stop)"
+        silent: true
+      - python3 -m http.server 8000
+
   preflight:
     desc: Pre commit/push checks — code rules + tests + build
     cmds:

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.test.logger)
+    alias(libs.plugins.dokka)
 }
 
 // Readable test output (Mocha/Vitest style): ✔/✘ per test, timings and a summary.

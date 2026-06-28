@@ -73,6 +73,7 @@ ventas con *snapshot*, productos que no se borran físicamente.
 task build       # compila el APK de debug
 task test        # tests unitarios
 task preflight   # lint + tests + build (pásalo antes de hacer commit)
+task docs        # genera documentación navegable (Dokka) desde el KDoc
 
 # o directamente con Gradle
 ./gradlew :app:assembleDebug
