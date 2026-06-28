@@ -1,4 +1,4 @@
-package com.cajaclara.app.domain.valueobject
+package com.cajaclara.app.feature.products.domain.valueobject
 
 /** Typed identifier for a Category. Prevents mixing it up with other entity ids. */
 @JvmInline

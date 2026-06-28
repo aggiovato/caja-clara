@@ -1,4 +1,4 @@
-package com.cajaclara.app.domain.valueobject
+package com.cajaclara.app.feature.sales.domain.valueobject
 
 /** Typed identifier for a Sale. Prevents mixing it up with other entity ids. */
 @JvmInline

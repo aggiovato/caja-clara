@@ -1,4 +1,4 @@
-package com.cajaclara.app.domain.model
+package com.cajaclara.app.feature.products.domain.model
 
 /**
  * Lifecycle status of a product. Products are never physically deleted; they are

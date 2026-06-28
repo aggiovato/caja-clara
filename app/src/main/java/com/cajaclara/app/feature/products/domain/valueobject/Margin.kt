@@ -1,4 +1,4 @@
-package com.cajaclara.app.domain.valueobject
+package com.cajaclara.app.feature.products.domain.valueobject
 
 import com.cajaclara.app.core.money.Money
 

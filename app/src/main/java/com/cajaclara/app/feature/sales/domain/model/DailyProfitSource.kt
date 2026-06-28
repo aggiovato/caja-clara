@@ -1,4 +1,4 @@
-package com.cajaclara.app.domain.model
+package com.cajaclara.app.feature.sales.domain.model
 
 /**
  * Where a daily profit figure comes from. Manual and automatic figures must stay

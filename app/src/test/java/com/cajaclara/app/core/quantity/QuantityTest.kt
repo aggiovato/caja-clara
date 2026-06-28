@@ -1,4 +1,4 @@
-package com.cajaclara.app.domain.valueobject
+package com.cajaclara.app.core.quantity
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

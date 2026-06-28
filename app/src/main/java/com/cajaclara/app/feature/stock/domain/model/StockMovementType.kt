@@ -1,4 +1,4 @@
-package com.cajaclara.app.domain.model
+package com.cajaclara.app.feature.stock.domain.model
 
 /** Type of a stock movement (section 11.4). */
 enum class StockMovementType {

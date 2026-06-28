@@ -1,4 +1,4 @@
-package com.cajaclara.app.domain.valueobject
+package com.cajaclara.app.core.quantity
 
 /**
  * A non-negative count of units (stock on hand, sale line quantities).

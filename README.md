@@ -43,13 +43,17 @@ Hexagonal adaptada — el dominio no conoce Android, Room ni Compose:
 UI (Compose) → ViewModel → UseCase → RepositoryPort → RoomRepository → DAO → SQLite
 ```
 
-Estructura de paquetes (raíz `com.cajaclara.app`):
+Organización **feature-first** (Screaming Architecture): el nivel superior grita el
+negocio, no la tecnología. Cada feature lleva sus capas `domain`/`data`; la UI se mantiene
+como núcleo aparte y los primitivos compartidos en `core` (raíz `com.cajaclara.app`):
 
 ```
-core/{money,date,result,dispatcher}      primitivos transversales (Money…)
-ui/{designsystem,navigation,home,…}      Compose
-domain/{model,valueobject,repository,service,usecase}
-data/local/room/{dao,entity,migration,converter}, data/mapper, data/repository
+core/{money,quantity,date,result,dispatcher}     primitivos compartidos (Money, Quantity…)
+feature/products/{domain,data}                   Product, Category, Margin, ProductStatus…
+feature/sales/{domain,data}                       Sale, SaleLine, DailyProfit…
+feature/stock/{domain,data}                       StockMovement…
+feature/stats/{domain,data}                       DailyBalance, balances por rango
+ui/{designsystem,navigation,home,…}              núcleo de UI (Compose), separado
 di/{DatabaseModule,RepositoryModule,UseCaseModule}
 ```
 
