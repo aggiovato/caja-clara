@@ -1,0 +1,49 @@
+name: Release
+
+# Triggered when a version tag is pushed, e.g. `git push --follow-tags` after `task version:tag`.
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write   # required to create the Release and upload the APK
+
+jobs:
+  release:
+    name: Build & publish APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build release APK
+        run: ./gradlew :app:assembleRelease --no-daemon
+
+      # NOTE: without a keystore the APK is UNSIGNED (`app-release-unsigned.apk`).
+      # For distributable builds, add signing with repo secrets
+      # (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD) and a
+      # signingConfig in app/build.gradle.kts.
+      - name: Rename APK with the version
+        run: |
+          mkdir -p dist
+          src=$(ls app/build/outputs/apk/release/*.apk | head -1)
+          cp "$src" "dist/caja-clara-${GITHUB_REF_NAME}.apk"
+          ls -l dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Caja Clara ${{ github.ref_name }}
+          generate_release_notes: true
+          files: dist/*.apk

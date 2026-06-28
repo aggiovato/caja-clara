@@ -1,0 +1,128 @@
+# Caja Clara Taskfile — https://taskfile.dev
+# Run `task` (no args) to list the available tasks.
+version: '3'
+
+vars:
+  GRADLEW: ./gradlew
+  GRADLE_FLAGS: --no-daemon
+  PROPS: gradle.properties
+
+tasks:
+  default:
+    desc: List the available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  # ---------------------------------------------------------------------------
+  # Build & test
+  # ---------------------------------------------------------------------------
+  build:
+    desc: Build the debug APK
+    cmds:
+      - "{{.GRADLEW}} :app:assembleDebug {{.GRADLE_FLAGS}}"
+
+  test:
+    desc: Run the unit tests (JVM) printing each test (Mocha/Vitest style)
+    cmds:
+      # --rerun: always run even if UP-TO-DATE (otherwise nothing is printed).
+      # --console=rich: color and ✔/✘ symbols. NOTE: with --no-daemon test-logger
+      # downgrades to PLAIN (loses the symbols), so we do NOT pass --no-daemon here.
+      - "{{.GRADLEW}} :app:testDebugUnitTest --rerun --console=rich"
+
+  test:watch:
+    desc: Re-run tests on file changes (watch mode, like vitest --watch)
+    cmds:
+      # -t (continuous): watches sources and re-runs. Uses the daemon (no --no-daemon).
+      - "{{.GRADLEW}} :app:testDebugUnitTest -t --console=rich"
+
+  lint:
+    desc: Run the Android linter over the code
+    cmds:
+      - "{{.GRADLEW}} :app:lintDebug {{.GRADLE_FLAGS}}"
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - "{{.GRADLEW}} clean {{.GRADLE_FLAGS}}"
+
+  preflight:
+    desc: Pre commit/push checks — code rules + tests + build
+    cmds:
+      - task: lint
+      - task: test
+      - task: build
+      - cmd: echo "✅ Preflight OK"
+        silent: true
+
+  # ---------------------------------------------------------------------------
+  # Release
+  # ---------------------------------------------------------------------------
+  release:apk:
+    desc: Build the release APK (unsigned until a keystore is configured)
+    cmds:
+      - "{{.GRADLEW}} :app:assembleRelease {{.GRADLE_FLAGS}}"
+
+  # ---------------------------------------------------------------------------
+  # Versioning (SemVer). VERSION_NAME and VERSION_CODE live in gradle.properties.
+  # Typical flow:  task version:minor  ->  git commit  ->  task version:tag  ->  git push --follow-tags
+  # ---------------------------------------------------------------------------
+  version:show:
+    desc: Show the current version
+    silent: true
+    cmds:
+      - |
+        name=$(grep '^VERSION_NAME=' {{.PROPS}} | cut -d= -f2)
+        code=$(grep '^VERSION_CODE=' {{.PROPS}} | cut -d= -f2)
+        echo "versionName=$name  versionCode=$code"
+
+  version:patch:
+    desc: Bump the patch version (x.y.Z) and increment versionCode
+    cmds:
+      - task: _bump
+        vars: { PART: patch }
+
+  version:minor:
+    desc: Bump the minor version (x.Y.0) and increment versionCode
+    cmds:
+      - task: _bump
+        vars: { PART: minor }
+
+  version:major:
+    desc: Bump the major version (X.0.0) and increment versionCode
+    cmds:
+      - task: _bump
+        vars: { PART: major }
+
+  version:tag:
+    desc: Create an annotated git tag v<version> from gradle.properties
+    silent: true
+    cmds:
+      - |
+        name=$(grep '^VERSION_NAME=' {{.PROPS}} | cut -d= -f2)
+        if git rev-parse "v$name" >/dev/null 2>&1; then
+          echo "Tag v$name already exists."; exit 1
+        fi
+        git tag -a "v$name" -m "Release v$name"
+        echo "Tag v$name created. Push it with: git push --follow-tags"
+
+  _bump:
+    internal: true
+    silent: true
+    cmds:
+      - |
+        part="{{.PART}}"
+        name=$(grep '^VERSION_NAME=' {{.PROPS}} | cut -d= -f2)
+        code=$(grep '^VERSION_CODE=' {{.PROPS}} | cut -d= -f2)
+        major=${name%%.*}; rest=${name#*.}; minor=${rest%%.*}; patch=${rest#*.}
+        case "$part" in
+          major) major=$((major+1)); minor=0; patch=0;;
+          minor) minor=$((minor+1)); patch=0;;
+          patch) patch=$((patch+1));;
+          *) echo "Invalid PART: $part"; exit 1;;
+        esac
+        newname="$major.$minor.$patch"
+        newcode=$((code+1))
+        sed -i "s/^VERSION_NAME=.*/VERSION_NAME=$newname/" {{.PROPS}}
+        sed -i "s/^VERSION_CODE=.*/VERSION_CODE=$newcode/" {{.PROPS}}
+        echo "Version: $name ($code) -> $newname ($newcode)"
