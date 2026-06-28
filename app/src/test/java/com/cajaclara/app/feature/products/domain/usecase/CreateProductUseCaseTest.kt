@@ -64,6 +64,14 @@ class CreateProductUseCaseTest {
     }
 
     @Test
+    fun `is created sold out when there is no stock`() = runTest {
+        val withStock = create(NewProduct(name = "A", cost = Money.ZERO, pvp = Money.ZERO, stock = Quantity(3)))
+        val noStock = create(NewProduct(name = "B", cost = Money.ZERO, pvp = Money.ZERO, stock = Quantity.ZERO))
+        assertEquals(ProductStatus.ACTIVE, repo.getProduct(withStock)!!.status)
+        assertEquals(ProductStatus.SOLD_OUT, repo.getProduct(noStock)!!.status)
+    }
+
+    @Test
     fun `allows price below cost`() = runTest {
         val id = create(
             NewProduct(name = "X", cost = Money.fromPesos("10,00"), pvp = Money.fromPesos("6,00")),

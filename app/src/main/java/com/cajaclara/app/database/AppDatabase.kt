@@ -2,6 +2,7 @@ package com.cajaclara.app.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.cajaclara.app.feature.products.data.local.dao.CategoryDao
 import com.cajaclara.app.feature.products.data.local.dao.PriceHistoryDao
 import com.cajaclara.app.feature.products.data.local.dao.ProductDao
 import com.cajaclara.app.feature.products.data.local.entity.CategoryEntity
@@ -22,10 +23,11 @@ import com.cajaclara.app.feature.products.data.local.entity.ProductEntity
         CategoryEntity::class,
         PriceHistoryEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
     abstract fun priceHistoryDao(): PriceHistoryDao
+    abstract fun categoryDao(): CategoryDao
 }

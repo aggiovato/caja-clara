@@ -3,6 +3,9 @@ package com.cajaclara.app.di
 import android.content.Context
 import androidx.room.Room
 import com.cajaclara.app.database.AppDatabase
+import com.cajaclara.app.database.MIGRATION_1_2
+import com.cajaclara.app.database.SeedCallback
+import com.cajaclara.app.feature.products.data.local.dao.CategoryDao
 import com.cajaclara.app.feature.products.data.local.dao.PriceHistoryDao
 import com.cajaclara.app.feature.products.data.local.dao.ProductDao
 import dagger.Module
@@ -20,11 +23,17 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "caja_clara.db").build()
+        Room.databaseBuilder(context, AppDatabase::class.java, "caja_clara.db")
+            .addMigrations(MIGRATION_1_2)
+            .addCallback(SeedCallback)
+            .build()
 
     @Provides
     fun provideProductDao(db: AppDatabase): ProductDao = db.productDao()
 
     @Provides
     fun providePriceHistoryDao(db: AppDatabase): PriceHistoryDao = db.priceHistoryDao()
+
+    @Provides
+    fun provideCategoryDao(db: AppDatabase): CategoryDao = db.categoryDao()
 }

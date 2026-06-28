@@ -11,6 +11,7 @@ data class ProductEntity(
     val sku: String?,
     val categoryId: Long?,
     val description: String?,
+    val imagePath: String?,
     val currentCostCents: Long,
     val currentPvpCents: Long,
     val stockQuantity: Int,

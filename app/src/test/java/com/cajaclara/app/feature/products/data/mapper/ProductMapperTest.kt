@@ -20,6 +20,7 @@ class ProductMapperTest {
         sku = "CAF-01",
         categoryId = CategoryId(3),
         description = "Ground coffee",
+        imagePath = "products/7.jpg",
         currentCost = Money.fromPesos("4,00"),
         currentPvp = Money.fromPesos("10,00"),
         stockQuantity = Quantity(5),
@@ -37,6 +38,7 @@ class ProductMapperTest {
         assertEquals(5, e.stockQuantity)
         assertEquals("SOLD_OUT", e.status)
         assertEquals(3L, e.categoryId)
+        assertEquals("products/7.jpg", e.imagePath)
         assertEquals(1_000L, e.createdAt)
     }
 
@@ -63,7 +65,7 @@ class ProductMapperTest {
     fun `entity with unknown status would fail fast`() {
         val bad = ProductEntity(
             id = 1, name = "X", sku = null, categoryId = null, description = null,
-            currentCostCents = 0, currentPvpCents = 0, stockQuantity = 0,
+            imagePath = null, currentCostCents = 0, currentPvpCents = 0, stockQuantity = 0,
             status = "NOT_A_STATUS", createdAt = 0, updatedAt = 0,
         )
         try {

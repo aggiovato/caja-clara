@@ -1,6 +1,10 @@
 package com.cajaclara.app.di
 
+import com.cajaclara.app.feature.products.data.AndroidImageStore
+import com.cajaclara.app.feature.products.data.ImageStore
+import com.cajaclara.app.feature.products.data.repository.RoomCategoryRepository
 import com.cajaclara.app.feature.products.data.repository.RoomProductRepository
+import com.cajaclara.app.feature.products.domain.repository.CategoryRepository
 import com.cajaclara.app.feature.products.domain.repository.ProductRepository
 import dagger.Binds
 import dagger.Module
@@ -16,4 +20,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindProductRepository(impl: RoomProductRepository): ProductRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCategoryRepository(impl: RoomCategoryRepository): CategoryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindImageStore(impl: AndroidImageStore): ImageStore
 }

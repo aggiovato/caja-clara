@@ -18,10 +18,14 @@ data class NewProduct(
     val sku: String? = null,
     val categoryId: CategoryId? = null,
     val description: String? = null,
+    val imagePath: String? = null,
 )
 
 /**
- * Creates a product after validating it. A new product starts [ProductStatus.ACTIVE].
+ * Creates a product after validating it.
+ *
+ * A product with no stock yet starts as [ProductStatus.SOLD_OUT] (you can create it before
+ * actually having units); with stock it starts [ProductStatus.ACTIVE].
  *
  * Validates that the name is not blank and that cost/price are not negative. A price
  * below cost is allowed (the UI warns and lets the user confirm); it is not blocked here.
@@ -42,10 +46,11 @@ class CreateProductUseCase(
             sku = input.sku?.trim()?.ifBlank { null },
             categoryId = input.categoryId,
             description = input.description?.trim()?.ifBlank { null },
+            imagePath = input.imagePath,
             currentCost = input.cost,
             currentPvp = input.pvp,
             stockQuantity = input.stock,
-            status = ProductStatus.ACTIVE,
+            status = if (input.stock.isZero) ProductStatus.SOLD_OUT else ProductStatus.ACTIVE,
             createdAt = now,
             updatedAt = now,
         )

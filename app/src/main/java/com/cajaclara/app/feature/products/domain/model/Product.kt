@@ -21,6 +21,8 @@ data class Product(
     val sku: String? = null,
     val categoryId: CategoryId? = null,
     val description: String? = null,
+    /** Path to the saved product image on disk; null falls back to a category icon in the UI. */
+    val imagePath: String? = null,
     val currentCost: Money,
     val currentPvp: Money,
     val stockQuantity: Quantity,
