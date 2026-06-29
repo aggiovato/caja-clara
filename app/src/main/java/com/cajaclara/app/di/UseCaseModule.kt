@@ -9,6 +9,7 @@ import com.cajaclara.app.feature.products.domain.usecase.ObserveCategoriesUseCas
 import com.cajaclara.app.feature.products.domain.usecase.ObserveProductsUseCase
 import com.cajaclara.app.feature.products.domain.usecase.PauseProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.ResumeProductUseCase
+import com.cajaclara.app.feature.products.domain.usecase.SuggestSkuUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductCostUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductPvpUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductUseCase
@@ -67,6 +68,9 @@ object UseCaseModule {
     @Provides
     fun provideGetProduct(repository: ProductRepository): GetProductUseCase =
         GetProductUseCase(repository)
+
+    @Provides
+    fun provideSuggestSku(): SuggestSkuUseCase = SuggestSkuUseCase()
 
     @Provides
     fun provideAdjustStock(

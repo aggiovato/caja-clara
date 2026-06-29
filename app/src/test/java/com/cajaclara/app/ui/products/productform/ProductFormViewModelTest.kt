@@ -14,6 +14,7 @@ import com.cajaclara.app.feature.products.domain.usecase.GetProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.ObserveCategoriesUseCase
 import com.cajaclara.app.feature.products.domain.usecase.PauseProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.ResumeProductUseCase
+import com.cajaclara.app.feature.products.domain.usecase.SuggestSkuUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductCostUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductPvpUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductUseCase
@@ -83,6 +84,7 @@ class ProductFormViewModelTest {
         resumeProduct = ResumeProductUseCase(productRepo, clock),
         archiveProduct = ArchiveProductUseCase(productRepo, clock),
         adjustStock = AdjustStockUseCase(productRepo, FakeStockRepository(), clock),
+        suggestSku = SuggestSkuUseCase(),
         observeCategories = ObserveCategoriesUseCase(FakeCategoryRepository(categories)),
         imageStore = FakeImageStore(),
         savedStateHandle = SavedStateHandle(),
@@ -104,6 +106,20 @@ class ProductFormViewModelTest {
         assertEquals("Café", product.name)
         assertEquals(Money(210), product.currentCost)
         assertEquals(5L, product.categoryId?.value)
+    }
+
+    @Test
+    fun `blank SKU falls back to the name-based suggestion`() = runTest {
+        val vm = viewModel()
+        vm.save(name = "Café molido", costText = "2,10", pvpText = "3,50", stockText = "1", sku = "", description = "")
+        assertEquals("cafe-molido", productRepo.stored.values.first().sku)
+    }
+
+    @Test
+    fun `explicit SKU is kept over the suggestion`() = runTest {
+        val vm = viewModel()
+        vm.save(name = "Café molido", costText = "2,10", pvpText = "3,50", stockText = "1", sku = "CM-01", description = "")
+        assertEquals("CM-01", productRepo.stored.values.first().sku)
     }
 
     @Test

@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -24,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.cajaclara.app.ui.designsystem.AppBackground
 import com.cajaclara.app.ui.designsystem.AppEmptyState
 import com.cajaclara.app.ui.products.productform.ProductFormScreen
 import com.cajaclara.app.ui.products.products.ProductsScreen
@@ -39,7 +41,12 @@ fun AppNavigation() {
     val route = currentRoute?.destination?.route
     val showBottomBar = TopTab.entries.any { it.route == route }
 
+    AppBackground {
     Scaffold(
+        // Transparent so the decorative background shows through; screens are transparent too.
+        containerColor = Color.Transparent,
+        // A transparent container yields no content color, so set a readable default.
+        contentColor = MaterialTheme.colorScheme.onBackground,
         bottomBar = {
             // Animate the bar in/out so it slides with screen transitions instead of popping.
             AnimatedVisibility(
@@ -102,5 +109,6 @@ fun AppNavigation() {
                 ProductFormScreen(onDone = { navController.popBackStack() })
             }
         }
+    }
     }
 }

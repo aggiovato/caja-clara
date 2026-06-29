@@ -18,6 +18,7 @@ import com.cajaclara.app.feature.products.domain.usecase.ObserveCategoriesUseCas
 import com.cajaclara.app.feature.products.domain.usecase.PauseProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.ProductEdits
 import com.cajaclara.app.feature.products.domain.usecase.ResumeProductUseCase
+import com.cajaclara.app.feature.products.domain.usecase.SuggestSkuUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductCostUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductPvpUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductUseCase
@@ -45,6 +46,7 @@ class ProductFormViewModel @Inject constructor(
     private val resumeProduct: ResumeProductUseCase,
     private val archiveProduct: ArchiveProductUseCase,
     private val adjustStock: AdjustStockUseCase,
+    private val suggestSku: SuggestSkuUseCase,
     observeCategories: ObserveCategoriesUseCase,
     private val imageStore: ImageStore,
     savedStateHandle: SavedStateHandle,
@@ -112,6 +114,10 @@ class ProductFormViewModel @Inject constructor(
 
     fun onPrefillConsumed() = _state.update { it.copy(prefill = null) }
 
+    /** Refresh the suggested SKU (shown as the SKU placeholder) from the current name. */
+    fun onNameChanged(name: String) =
+        _state.update { it.copy(skuSuggestion = suggestSku(name)) }
+
     fun onCategorySelected(category: Category) =
         _state.update { it.copy(selectedCategory = category) }
 
@@ -157,7 +163,7 @@ class ProductFormViewModel @Inject constructor(
                 id,
                 ProductEdits(
                     name = name,
-                    sku = sku.ifBlank { null },
+                    sku = resolveSku(sku, name),
                     categoryId = _state.value.selectedCategory?.id,
                     description = description.ifBlank { null },
                     imagePath = _state.value.imagePath,
@@ -194,7 +200,7 @@ class ProductFormViewModel @Inject constructor(
                     cost = cost!!,
                     pvp = pvp!!,
                     stock = Quantity(stock),
-                    sku = sku.ifBlank { null },
+                    sku = resolveSku(sku, name),
                     categoryId = _state.value.selectedCategory?.id,
                     description = description.ifBlank { null },
                     imagePath = _state.value.imagePath,
@@ -202,6 +208,10 @@ class ProductFormViewModel @Inject constructor(
             )
         }
     }
+
+    /** The typed SKU, or the name-based suggestion when left blank; null if both are empty. */
+    private fun resolveSku(typed: String, name: String): String? =
+        typed.trim().ifBlank { suggestSku(name) }.ifBlank { null }
 
     /** Change the cost (writes price history). Edit mode only. */
     fun changeCost(text: String) = changePrice(text) { id, money -> updateCost(id, money) }

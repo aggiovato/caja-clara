@@ -24,6 +24,8 @@ data class ProductFormUiState(
     val isSaving: Boolean = false,
     val error: String? = null,
     val saved: Boolean = false,
+    /** SKU slug suggested from the name; shown as the SKU field placeholder. */
+    val skuSuggestion: String = "",
     /** One-shot: when non-null the screen fills the text fields, then calls onPrefillConsumed(). */
     val prefill: ProductPrefill? = null,
 )

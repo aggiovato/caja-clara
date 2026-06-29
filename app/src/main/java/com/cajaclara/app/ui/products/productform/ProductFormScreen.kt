@@ -36,7 +36,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -93,6 +95,11 @@ fun ProductFormScreen(
     val takePhoto = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture(),
     ) { saved -> if (saved) cameraTarget?.let { viewModel.onPhotoTaken(it.path) } }
+
+    // Feed name edits to the ViewModel so it can suggest a SKU slug (shown as the placeholder).
+    LaunchedEffect(Unit) {
+        snapshotFlow { name.text.toString() }.collect(viewModel::onNameChanged)
+    }
 
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
 
@@ -161,6 +168,9 @@ private fun ProductFormContent(
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        // Transparent so the app's decorative background shows through.
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         topBar = {
             TopAppBar(
                 title = { Text(if (state.isEdit) "Editar producto" else "Nuevo producto") },
@@ -171,7 +181,7 @@ private fun ProductFormContent(
                 },
                 windowInsets = WindowInsets(0, 0, 0, 0),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = Color.Transparent,
                 ),
             )
         },
@@ -243,8 +253,10 @@ private fun ProductFormContent(
             AppTextField(
                 sku,
                 label = "SKU",
+                // Suggestion from the name, used if left blank. Falls back to a hint when empty.
+                placeholder = state.skuSuggestion.ifBlank { "Opcional" },
                 tooltip = "Código interno único para identificar y controlar el producto en tu inventario " +
-                    "(Stock Keeping Unit). Es opcional.",
+                    "(Stock Keeping Unit). Se sugiere a partir del nombre y es opcional.",
             )
             AppTextField(description, label = "Descripción (opcional)", singleLine = false, minLines = 4)
 
