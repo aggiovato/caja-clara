@@ -13,6 +13,12 @@ import com.cajaclara.app.feature.products.domain.usecase.SuggestSkuUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductCostUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductPvpUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductUseCase
+import com.cajaclara.app.feature.sales.domain.repository.CashCloseRepository
+import com.cajaclara.app.feature.sales.domain.repository.SalesRepository
+import com.cajaclara.app.feature.sales.domain.usecase.CloseCashUseCase
+import com.cajaclara.app.feature.sales.domain.usecase.ObserveCashCloseUseCase
+import com.cajaclara.app.feature.sales.domain.usecase.ObserveDailySalesUseCase
+import com.cajaclara.app.feature.sales.domain.usecase.RegisterSaleUseCase
 import com.cajaclara.app.feature.stock.domain.repository.StockRepository
 import com.cajaclara.app.feature.stock.domain.usecase.AdjustStockUseCase
 import dagger.Module
@@ -78,4 +84,27 @@ object UseCaseModule {
         stockRepository: StockRepository,
         clock: Clock,
     ): AdjustStockUseCase = AdjustStockUseCase(productRepository, stockRepository, clock)
+
+    @Provides
+    fun provideRegisterSale(
+        salesRepository: SalesRepository,
+        productRepository: ProductRepository,
+        stockRepository: StockRepository,
+        clock: Clock,
+    ): RegisterSaleUseCase = RegisterSaleUseCase(salesRepository, productRepository, stockRepository, clock)
+
+    @Provides
+    fun provideObserveDailySales(repository: SalesRepository): ObserveDailySalesUseCase =
+        ObserveDailySalesUseCase(repository)
+
+    @Provides
+    fun provideCloseCash(
+        salesRepository: SalesRepository,
+        cashCloseRepository: CashCloseRepository,
+        clock: Clock,
+    ): CloseCashUseCase = CloseCashUseCase(salesRepository, cashCloseRepository, clock)
+
+    @Provides
+    fun provideObserveCashClose(repository: CashCloseRepository): ObserveCashCloseUseCase =
+        ObserveCashCloseUseCase(repository)
 }

@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import java.time.Clock
+import java.time.ZoneId
 import javax.inject.Singleton
 
 /** Provides shared, app-wide collaborators. */
@@ -16,4 +17,9 @@ object CoreModule {
     @Provides
     @Singleton
     fun provideClock(): Clock = Clock.systemDefaultZone()
+
+    /** Device time zone; used to map sales to calendar days. */
+    @Provides
+    @Singleton
+    fun provideZoneId(): ZoneId = ZoneId.systemDefault()
 }

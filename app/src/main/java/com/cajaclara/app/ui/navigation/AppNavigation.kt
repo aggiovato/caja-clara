@@ -28,6 +28,7 @@ import androidx.navigation.navArgument
 import com.cajaclara.app.ui.designsystem.AppBackground
 import com.cajaclara.app.ui.designsystem.AppEmptyState
 import com.cajaclara.app.ui.products.productform.ProductFormScreen
+import com.cajaclara.app.ui.sales.sales.SalesScreen
 import com.cajaclara.app.ui.products.products.ProductsScreen
 
 /**
@@ -98,7 +99,7 @@ fun AppNavigation() {
                     onEditProduct = { id -> navController.navigate(Routes.editProduct(id.value)) },
                 )
             }
-            composable(Routes.SALES) { AppEmptyState(title = "Ventas", subtitle = "Próximamente") }
+            composable(Routes.SALES) { SalesScreen() }
             composable(Routes.STATS) { AppEmptyState(title = "Estadísticas", subtitle = "Próximamente") }
             composable(
                 route = Routes.PRODUCT_FORM_PATTERN,

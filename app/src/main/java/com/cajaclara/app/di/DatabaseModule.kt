@@ -7,6 +7,8 @@ import com.cajaclara.app.database.SeedCallback
 import com.cajaclara.app.feature.products.data.local.dao.CategoryDao
 import com.cajaclara.app.feature.products.data.local.dao.PriceHistoryDao
 import com.cajaclara.app.feature.products.data.local.dao.ProductDao
+import com.cajaclara.app.feature.sales.data.local.dao.CashCloseDao
+import com.cajaclara.app.feature.sales.data.local.dao.SaleDao
 import com.cajaclara.app.feature.stock.data.local.dao.StockMovementDao
 import dagger.Module
 import dagger.Provides
@@ -42,4 +44,10 @@ object DatabaseModule {
 
     @Provides
     fun provideStockMovementDao(db: AppDatabase): StockMovementDao = db.stockMovementDao()
+
+    @Provides
+    fun provideSaleDao(db: AppDatabase): SaleDao = db.saleDao()
+
+    @Provides
+    fun provideCashCloseDao(db: AppDatabase): CashCloseDao = db.cashCloseDao()
 }
