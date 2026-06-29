@@ -13,15 +13,16 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.theme.AppBorderWidth
 import com.cajaclara.app.ui.theme.AppCornerRadius
 import com.cajaclara.app.ui.theme.CajaClaraTheme
 
 /** Solid primary button for the main action. */
 @Composable
-fun PrimaryActionButton(
+fun AppPrimaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -39,7 +40,7 @@ fun PrimaryActionButton(
 
 /** Outlined primary button for the secondary action. */
 @Composable
-fun SecondaryActionButton(
+fun AppSecondaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -57,7 +58,8 @@ fun SecondaryActionButton(
     }
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
 private fun ButtonsPreview() {
     CajaClaraTheme {
@@ -65,8 +67,8 @@ private fun ButtonsPreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            PrimaryActionButton("Guardar", {}, Modifier.fillMaxWidth())
-            SecondaryActionButton("Cancelar", {}, Modifier.fillMaxWidth())
+            AppPrimaryButton("Guardar", {}, Modifier.fillMaxWidth())
+            AppSecondaryButton("Cancelar", {}, Modifier.fillMaxWidth())
         }
     }
 }

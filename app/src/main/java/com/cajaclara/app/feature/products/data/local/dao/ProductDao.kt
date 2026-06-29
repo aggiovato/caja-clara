@@ -17,7 +17,8 @@ interface ProductDao {
     @Query(
         """
         SELECT * FROM products
-        WHERE (:status IS NULL OR status = :status)
+        WHERE status != 'ARCHIVED'
+          AND (:status IS NULL OR status = :status)
           AND (:query IS NULL OR name LIKE '%' || :query || '%' OR sku LIKE '%' || :query || '%')
         ORDER BY name ASC
         """,

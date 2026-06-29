@@ -12,13 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.theme.CajaClaraTheme
 
 /** Centered spinner for initial loading. */
 @Composable
-fun LoadingState(modifier: Modifier = Modifier) {
+fun AppLoadingState(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator()
     }
@@ -26,7 +27,7 @@ fun LoadingState(modifier: Modifier = Modifier) {
 
 /** Centered message for empty screens. */
 @Composable
-fun EmptyState(
+fun AppEmptyState(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
@@ -52,18 +53,20 @@ fun EmptyState(
     }
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
-private fun EmptyStatePreview() {
+private fun AppEmptyStatePreview() {
     CajaClaraTheme {
-        EmptyState(title = "No hay productos", subtitle = "Pulsa + para crear el primero")
+        AppEmptyState(title = "No hay productos", subtitle = "Pulsa + para crear el primero")
     }
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
-private fun LoadingStatePreview() {
+private fun AppLoadingStatePreview() {
     CajaClaraTheme {
-        LoadingState()
+        AppLoadingState()
     }
 }

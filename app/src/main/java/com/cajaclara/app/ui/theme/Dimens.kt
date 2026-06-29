@@ -8,4 +8,4 @@ import androidx.compose.ui.unit.dp
  * [AppBorderWidth] matches the search input's outline so cards and inputs share the same
  * border thickness.
  */
-val AppBorderWidth = 2.dp
+val AppBorderWidth = 1.dp

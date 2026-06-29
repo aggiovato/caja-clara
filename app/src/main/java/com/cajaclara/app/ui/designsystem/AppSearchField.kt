@@ -10,13 +10,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.theme.CajaClaraTheme
 
 /** Search input: [AppTextField] in "search mode" (leading search icon, no label). */
 @Composable
-fun SearchField(
+fun AppSearchField(
     state: TextFieldState,
     placeholder: String,
     modifier: Modifier = Modifier,
@@ -29,16 +30,17 @@ fun SearchField(
     )
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
-private fun SearchFieldPreview() {
+private fun AppSearchFieldPreview() {
     CajaClaraTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            SearchField(rememberTextFieldState(), "Buscar producto", Modifier.fillMaxWidth())
-            SearchField(rememberTextFieldState("Café"), "Buscar producto", Modifier.fillMaxWidth())
+            AppSearchField(rememberTextFieldState(), "Buscar producto", Modifier.fillMaxWidth())
+            AppSearchField(rememberTextFieldState("Café"), "Buscar producto", Modifier.fillMaxWidth())
         }
     }
 }

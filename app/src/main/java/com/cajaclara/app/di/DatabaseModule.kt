@@ -3,11 +3,11 @@ package com.cajaclara.app.di
 import android.content.Context
 import androidx.room.Room
 import com.cajaclara.app.database.AppDatabase
-import com.cajaclara.app.database.MIGRATION_1_2
 import com.cajaclara.app.database.SeedCallback
 import com.cajaclara.app.feature.products.data.local.dao.CategoryDao
 import com.cajaclara.app.feature.products.data.local.dao.PriceHistoryDao
 import com.cajaclara.app.feature.products.data.local.dao.ProductDao
+import com.cajaclara.app.feature.stock.data.local.dao.StockMovementDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,7 +24,10 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "caja_clara.db")
-            .addMigrations(MIGRATION_1_2)
+            // Pre-release: no real installs, schema still in flux. Instead of writing a
+            // migration for every change, wipe and let the seed repopulate. Re-introduce
+            // real migrations (and drop this) before the first shipped release.
+            .fallbackToDestructiveMigration(dropAllTables = true)
             .addCallback(SeedCallback)
             .build()
 
@@ -36,4 +39,7 @@ object DatabaseModule {
 
     @Provides
     fun provideCategoryDao(db: AppDatabase): CategoryDao = db.categoryDao()
+
+    @Provides
+    fun provideStockMovementDao(db: AppDatabase): StockMovementDao = db.stockMovementDao()
 }

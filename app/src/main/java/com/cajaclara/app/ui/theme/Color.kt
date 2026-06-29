@@ -2,14 +2,18 @@ package com.cajaclara.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Brand palette (section 5 of the roadmap).
-// Warm, clean small-shop identity: orange is the ACCENT (actions and active
-// selection), backgrounds are almost always white/gray — never massive orange.
+// Brand palette (section 5 of the roadmap). Clean small-shop identity, backgrounds
+// almost always white/gray. Names describe the actual hue, not the role: the primary
+// accent is TEAL in light mode and ORANGE in dark mode (see Orange below).
 
-// --- Orange (primary accent) ---
-val OrangeLight = Color(0xFFF59E42)    // Primary
-val OrangeCream = Color(0xFFFFF3E6)    // Soft primary (container/selection)
-val OrangeToasted = Color(0xFFEA7A1F)  // Primary hover/pressed
+// --- Teal (primary accent) ---
+val Teal = Color(0xFF009688)         // Light primary; reused as dark secondary
+val TealMist = Color(0xFFEDFCFA)     // Light primaryContainer; dark onPrimaryContainer
+val TealDeep = Color(0xFF057C70)     // Light onPrimaryContainer
+// Teal variants for an all-teal dark primary (alternative: Orange, see below).
+val TealBright = Color(0xFF4DB6AC)       // Dark primary (lighter teal pops on dark)
+val TealContainerDark = Color(0xFF134E48) // Dark primaryContainer
+val TealInk = Color(0xFF00251F)          // Text/icon on the dark teal primary
 
 // --- Warm neutrals ---
 val WarmWhite = Color(0xFFFAFAF8)      // App background
@@ -20,8 +24,20 @@ val Graphite = Color(0xFF1F2937)       // Primary text
 val SlateGray = Color(0xFF6B7280)      // Secondary text
 val MidGray = Color(0xFF9CA3AF)        // Muted text
 
+// --- Neutral surface containers (tooltips, dialogs, menus, raised chips/buttons/thumbnails) ---
+// Light: progressively darker than white so raised neutrals lift off the background.
+val SurfaceContainerLowLight = Color(0xFFFAFAFB)
+val SurfaceContainerLight = Color(0xFFF2F3F5)
+val SurfaceContainerHighLight = Color(0xFFEAECEF)
+val SurfaceContainerHighestLight = Color(0xFFE3E5E9)
+// Dark: progressively lighter than the dark surface.
+val SurfaceContainerLowDark = Color(0xFF1B2027)
+val SurfaceContainerDark = Color(0xFF22272F)
+val SurfaceContainerHighDark = Color(0xFF2A303A)
+val SurfaceContainerHighestDark = Color(0xFF323845)
+
 // --- Semantic / states ---
-val ProfitGreen = Color(0xFF22A06B)    // Success / profit / positive margin
+val ProfitGreen = Color(0xFF30795A)    // Success / profit / positive margin
 val CoralRed = Color(0xFFE05252)       // Error / sold out / loss
 val WarningAmber = Color(0xFFF2B84B)   // Warning / low margin
 val InfoBlue = Color(0xFF3B82A0)       // Info / stats data (charts)
@@ -36,16 +52,16 @@ val DeepGreen = Color(0xFF15663F)
 val DeepRed = Color(0xFF8A2B2B)
 val DeepAmber = Color(0xFF8A5A00)
 
-// --- Dark-mode variants (the palette is light; these keep the warmth) ---
-val OrangeDark = Color(0xFFF5A65A)
-val OrangeContainerDark = Color(0xFF6B3F12)
-val DarkBackground = Color(0xFF14171C)
-val DarkSurface = Color(0xFF1B1F24)
+// --- Dark-mode variants ---
+val Orange = Color(0xFFF5AF6C)              // Dark primary
+val OrangeContainerDark = Color(0xFF966635) // Dark primaryContainer (brownish orange)
+val DarkBackground = Color(0xFF171A21)
+val DarkSurface = Color(0xFF20252C)
 val DarkSurfaceVariant = Color(0xFF2A2F36)
 val DarkBorder = Color(0xFF3A3F46)
-val GreenDark = Color(0xFF4CC08A)
-val AmberDark = Color(0xFFF2C46B)
-val RedDark = Color(0xFFF08080)
+// Dark secondary reuses Teal (#009688), defined above.
+val AmberDark = Color(0xFFEAC377)
+val RedDark = Color(0xFFDC8F8F)
 val GreenContainerDark = Color(0xFF13392A)
 val AmberContainerDark = Color(0xFF4A3A12)
 val RedContainerDark = Color(0xFF4A2020)

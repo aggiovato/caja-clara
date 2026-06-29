@@ -7,6 +7,7 @@ import com.cajaclara.app.feature.products.domain.usecase.ObserveCategoriesUseCas
 import com.cajaclara.app.feature.products.domain.usecase.ObserveProductsUseCase
 import com.cajaclara.app.feature.products.domain.valueobject.ProductFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel

@@ -1,5 +1,10 @@
 package com.cajaclara.app.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -13,11 +18,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.cajaclara.app.ui.designsystem.EmptyState
+import androidx.navigation.navArgument
+import com.cajaclara.app.ui.designsystem.AppEmptyState
 import com.cajaclara.app.ui.products.productform.ProductFormScreen
 import com.cajaclara.app.ui.products.products.ProductsScreen
 
@@ -34,7 +41,12 @@ fun AppNavigation() {
 
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
+            // Animate the bar in/out so it slides with screen transitions instead of popping.
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+            ) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
                     tonalElevation = 0.dp,
@@ -72,13 +84,21 @@ fun AppNavigation() {
             startDestination = Routes.PRODUCTS,
             modifier = Modifier.padding(padding),
         ) {
-            composable(Routes.HOME) { EmptyState(title = "Inicio", subtitle = "Próximamente") }
+            composable(Routes.HOME) { AppEmptyState(title = "Inicio", subtitle = "Próximamente") }
             composable(Routes.PRODUCTS) {
-                ProductsScreen(onAddProduct = { navController.navigate(Routes.PRODUCT_FORM) })
+                ProductsScreen(
+                    onAddProduct = { navController.navigate(Routes.PRODUCT_FORM) },
+                    onEditProduct = { id -> navController.navigate(Routes.editProduct(id.value)) },
+                )
             }
-            composable(Routes.SALES) { EmptyState(title = "Ventas", subtitle = "Próximamente") }
-            composable(Routes.STATS) { EmptyState(title = "Estadísticas", subtitle = "Próximamente") }
-            composable(Routes.PRODUCT_FORM) {
+            composable(Routes.SALES) { AppEmptyState(title = "Ventas", subtitle = "Próximamente") }
+            composable(Routes.STATS) { AppEmptyState(title = "Estadísticas", subtitle = "Próximamente") }
+            composable(
+                route = Routes.PRODUCT_FORM_PATTERN,
+                arguments = listOf(
+                    navArgument("productId") { type = NavType.LongType; defaultValue = -1L },
+                ),
+            ) {
                 ProductFormScreen(onDone = { navController.popBackStack() })
             }
         }

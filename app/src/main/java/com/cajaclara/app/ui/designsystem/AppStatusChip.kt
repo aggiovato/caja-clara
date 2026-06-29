@@ -10,14 +10,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.theme.AppCornerRadius
 import com.cajaclara.app.ui.theme.CajaClaraTheme
 
 /** A small pill showing a status, e.g. "En stock (28)" or "Agotado". */
 @Composable
-fun StatusChip(
+fun AppStatusChip(
     text: String,
     containerColor: Color,
     contentColor: Color,
@@ -32,30 +33,32 @@ fun StatusChip(
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
         )
     }
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
-private fun StatusChipPreview() {
+private fun AppStatusChipPreview() {
     CajaClaraTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            StatusChip(
+            AppStatusChip(
                 "En stock (28)",
                 MaterialTheme.colorScheme.secondaryContainer,
                 MaterialTheme.colorScheme.onSecondaryContainer,
             )
-            StatusChip(
+            AppStatusChip(
                 "Agotado",
                 MaterialTheme.colorScheme.errorContainer,
                 MaterialTheme.colorScheme.onErrorContainer,
             )
-            StatusChip(
+            AppStatusChip(
                 "Pausado",
                 MaterialTheme.colorScheme.surfaceVariant,
                 MaterialTheme.colorScheme.onSurfaceVariant,

@@ -15,9 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cajaclara.app.feature.products.domain.model.ProductStatus
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.theme.CajaClaraTheme
 
 private val statusTabs = listOf(
@@ -44,6 +45,13 @@ internal fun StatusFilters(
             selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
             selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary,
         )
+        // "Todos" as an icon-only chip so all filters fit on one row.
+        FilterChip(
+            selected = selected == null,
+            onClick = { onStatusChange(null) },
+            label = { Icon(Icons.Filled.Apps, contentDescription = "Todos") },
+            colors = colors,
+        )
         statusTabs.forEach { (label, status) ->
             FilterChip(
                 selected = selected == status,
@@ -52,17 +60,11 @@ internal fun StatusFilters(
                 colors = colors,
             )
         }
-        // "Todos" as an icon-only chip so all filters fit on one row.
-        FilterChip(
-            selected = selected == null,
-            onClick = { onStatusChange(null) },
-            label = { Icon(Icons.Filled.Apps, contentDescription = "Todos") },
-            colors = colors,
-        )
     }
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
 private fun StatusFiltersPreview() {
     CajaClaraTheme {

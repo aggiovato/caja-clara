@@ -25,14 +25,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cajaclara.app.feature.products.domain.model.ProductStatus
-import com.cajaclara.app.ui.designsystem.EmptyState
-import com.cajaclara.app.ui.designsystem.LoadingState
-import com.cajaclara.app.ui.designsystem.SearchField
+import com.cajaclara.app.feature.products.domain.valueobject.ProductId
+import com.cajaclara.app.ui.designsystem.AppEmptyState
+import com.cajaclara.app.ui.designsystem.AppLoadingState
+import com.cajaclara.app.ui.designsystem.AppSearchField
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.products.products.components.ProductListItem
 import com.cajaclara.app.ui.products.products.components.StatusFilters
 import com.cajaclara.app.ui.products.products.components.previewProducts
@@ -41,6 +43,7 @@ import com.cajaclara.app.ui.theme.CajaClaraTheme
 @Composable
 fun ProductsScreen(
     onAddProduct: () -> Unit,
+    onEditProduct: (ProductId) -> Unit,
     viewModel: ProductsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -56,6 +59,7 @@ fun ProductsScreen(
         queryState = queryState,
         onStatusChange = viewModel::onStatusChange,
         onAddProduct = onAddProduct,
+        onEditProduct = onEditProduct,
     )
 }
 
@@ -66,6 +70,7 @@ private fun ProductsScreen(
     queryState: TextFieldState,
     onStatusChange: (ProductStatus?) -> Unit,
     onAddProduct: () -> Unit,
+    onEditProduct: (ProductId) -> Unit,
 ) {
     Scaffold(
         // The outer (navigation) Scaffold already applies the status-bar/nav-bar insets,
@@ -91,7 +96,7 @@ private fun ProductsScreen(
         },
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxWidth()) {
-            SearchField(
+            AppSearchField(
                 state = queryState,
                 placeholder = "Buscar producto",
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -100,8 +105,8 @@ private fun ProductsScreen(
             StatusFilters(selected = state.filter.status, onStatusChange = onStatusChange)
 
             when {
-                state.isLoading -> LoadingState()
-                state.products.isEmpty() -> EmptyState(
+                state.isLoading -> AppLoadingState()
+                state.products.isEmpty() -> AppEmptyState(
                     title = "No hay productos",
                     subtitle = "Pulsa + para crear el primero",
                 )
@@ -111,7 +116,7 @@ private fun ProductsScreen(
                 ) {
                     items(state.products, key = { it.id.value }) { product ->
                         val categoryName = product.categoryId?.let { state.categoryNames[it.value] }
-                        ProductListItem(product, categoryName)
+                        ProductListItem(product, categoryName, onClick = { onEditProduct(product.id) })
                     }
                 }
             }
@@ -119,7 +124,8 @@ private fun ProductsScreen(
     }
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
 private fun ProductsScreenPreview() {
     CajaClaraTheme {
@@ -128,11 +134,13 @@ private fun ProductsScreenPreview() {
             queryState = rememberTextFieldState(),
             onStatusChange = {},
             onAddProduct = {},
+            onEditProduct = {},
         )
     }
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
 private fun ProductsScreenEmptyPreview() {
     CajaClaraTheme {
@@ -141,6 +149,7 @@ private fun ProductsScreenEmptyPreview() {
             queryState = rememberTextFieldState(),
             onStatusChange = {},
             onAddProduct = {},
+            onEditProduct = {},
         )
     }
 }

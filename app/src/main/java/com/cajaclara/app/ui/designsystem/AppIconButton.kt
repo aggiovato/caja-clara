@@ -14,33 +14,49 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.theme.AppCornerRadius
 import com.cajaclara.app.ui.theme.CajaClaraTheme
 
-/** Solid primary icon button (white icon), with the app's token radius. */
+/**
+ * Solid icon button with the app's token radius. [subtle] uses a neutral surface tone
+ * instead of primary (for secondary actions like pause/archive).
+ */
 @Composable
 fun AppIconButton(
     icon: ImageVector,
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    subtle: Boolean = false,
 ) {
+    val shape = RoundedCornerShape(AppCornerRadius)
+    val colors = if (subtle) {
+        // A slightly raised neutral so the button lifts off the page background.
+        IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    } else {
+        IconButtonDefaults.filledIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        )
+    }
     FilledIconButton(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(AppCornerRadius),
-        colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-        ),
+        shape = shape,
+        colors = colors,
     ) {
         Icon(icon, contentDescription = contentDescription)
     }
 }
 
-@Preview(showBackground = true)
+@LightPreview
+@DarkPreview
 @Composable
 private fun AppIconButtonPreview() {
     CajaClaraTheme {

@@ -17,7 +17,7 @@ class ProductStatusTest {
     @Test
     fun `status values`() {
         assertEquals(
-            listOf("ACTIVE", "SOLD_OUT", "PAUSED"),
+            listOf("ACTIVE", "SOLD_OUT", "PAUSED", "ARCHIVED"),
             ProductStatus.entries.map { it.name },
         )
     }

@@ -1,15 +1,28 @@
 package com.cajaclara.app.ui.products.productform
 
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import com.cajaclara.app.core.money.Money
 import com.cajaclara.app.feature.products.data.CameraTarget
 import com.cajaclara.app.feature.products.data.ImageStore
 import com.cajaclara.app.feature.products.domain.model.Category
 import com.cajaclara.app.feature.products.domain.repository.CategoryRepository
+import com.cajaclara.app.feature.products.domain.usecase.ArchiveProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.CreateProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.FakeProductRepository
+import com.cajaclara.app.feature.products.domain.usecase.GetProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.ObserveCategoriesUseCase
+import com.cajaclara.app.feature.products.domain.usecase.PauseProductUseCase
+import com.cajaclara.app.feature.products.domain.usecase.ResumeProductUseCase
+import com.cajaclara.app.feature.products.domain.usecase.UpdateProductCostUseCase
+import com.cajaclara.app.feature.products.domain.usecase.UpdateProductPvpUseCase
+import com.cajaclara.app.feature.products.domain.usecase.UpdateProductUseCase
 import com.cajaclara.app.feature.products.domain.valueobject.CategoryId
+import com.cajaclara.app.feature.products.domain.valueobject.ProductId
+import com.cajaclara.app.feature.stock.domain.model.StockMovement
+import com.cajaclara.app.feature.stock.domain.repository.StockRepository
+import com.cajaclara.app.feature.stock.domain.usecase.AdjustStockUseCase
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +52,11 @@ private class FakeImageStore : ImageStore {
     override fun newCameraTarget(): CameraTarget = throw UnsupportedOperationException()
 }
 
+private class FakeStockRepository : StockRepository {
+    override suspend fun record(movement: StockMovement) {}
+    override fun observeMovements(productId: ProductId) = flowOf(emptyList<StockMovement>())
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProductFormViewModelTest {
 
@@ -57,8 +75,17 @@ class ProductFormViewModelTest {
 
     private fun viewModel() = ProductFormViewModel(
         createProduct = CreateProductUseCase(productRepo, clock),
+        getProduct = GetProductUseCase(productRepo),
+        updateProduct = UpdateProductUseCase(productRepo, clock),
+        updateCost = UpdateProductCostUseCase(productRepo, clock),
+        updatePvp = UpdateProductPvpUseCase(productRepo, clock),
+        pauseProduct = PauseProductUseCase(productRepo, clock),
+        resumeProduct = ResumeProductUseCase(productRepo, clock),
+        archiveProduct = ArchiveProductUseCase(productRepo, clock),
+        adjustStock = AdjustStockUseCase(productRepo, FakeStockRepository(), clock),
         observeCategories = ObserveCategoriesUseCase(FakeCategoryRepository(categories)),
         imageStore = FakeImageStore(),
+        savedStateHandle = SavedStateHandle(),
     )
 
     @Test
@@ -76,7 +103,7 @@ class ProductFormViewModelTest {
         val product = productRepo.stored.values.first()
         assertEquals("Café", product.name)
         assertEquals(Money(210), product.currentCost)
-        assertEquals(CategoryId(5), product.categoryId)
+        assertEquals(5L, product.categoryId?.value)
     }
 
     @Test

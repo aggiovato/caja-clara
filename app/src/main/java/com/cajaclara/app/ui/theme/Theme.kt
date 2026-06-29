@@ -11,10 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColorScheme = lightColorScheme(
-    primary = OrangeLight,
+    primary = Teal,
     onPrimary = White,
-    primaryContainer = OrangeCream,
-    onPrimaryContainer = OrangeToasted,
+    primaryContainer = TealMist,
+    onPrimaryContainer = TealDeep,
     secondary = ProfitGreen,
     onSecondary = White,
     secondaryContainer = GreenContainer,
@@ -33,16 +33,23 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Graphite,
     surfaceVariant = CloudGray,
     onSurfaceVariant = SlateGray,
+    surfaceContainerLowest = White,
+    surfaceContainerLow = SurfaceContainerLowLight,
+    surfaceContainer = SurfaceContainerLight,
+    surfaceContainerHigh = SurfaceContainerHighLight,
+    surfaceContainerHighest = SurfaceContainerHighestLight,
     outline = SoftGray,
     outlineVariant = CloudGray,
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = OrangeDark,
-    onPrimary = OrangeInk,
-    primaryContainer = OrangeContainerDark,
-    onPrimaryContainer = OrangeCream,
-    secondary = GreenDark,
+    // All-teal primary for dark. To go back to the orange dark primary (which looked good),
+    // swap these four for: Orange / OrangeInk / OrangeContainerDark / TealMist.
+    primary = TealBright,
+    onPrimary = TealInk,
+    primaryContainer = TealContainerDark,
+    onPrimaryContainer = TealMist,
+    secondary = Teal,
     onSecondary = GreenInk,
     secondaryContainer = GreenContainerDark,
     onSecondaryContainer = GreenContainer,
@@ -60,6 +67,11 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = WarmWhite,
     surfaceVariant = DarkSurfaceVariant,
     onSurfaceVariant = MidGray,
+    surfaceContainerLowest = DarkBackground,
+    surfaceContainerLow = SurfaceContainerLowDark,
+    surfaceContainer = SurfaceContainerDark,
+    surfaceContainerHigh = SurfaceContainerHighDark,
+    surfaceContainerHighest = SurfaceContainerHighestDark,
     outline = DarkBorder,
     outlineVariant = DarkSurface,
 )
