@@ -28,6 +28,15 @@ interface SaleDao {
     @Query("SELECT * FROM sales WHERE soldAt >= :startMillis AND soldAt < :endMillis ORDER BY soldAt DESC")
     fun observeBetween(startMillis: Long, endMillis: Long): Flow<List<SaleEntity>>
 
+    /** Total units sold (sum of line quantities) within the time window. */
+    @Query(
+        """
+        SELECT COALESCE(SUM(quantity), 0) FROM sale_lines
+        WHERE saleId IN (SELECT id FROM sales WHERE soldAt >= :startMillis AND soldAt < :endMillis)
+        """,
+    )
+    fun observeUnitsSoldBetween(startMillis: Long, endMillis: Long): Flow<Int>
+
     @Query("SELECT * FROM sale_lines WHERE saleId = :saleId")
     suspend fun linesForSale(saleId: Long): List<SaleLineEntity>
 }

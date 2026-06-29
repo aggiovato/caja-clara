@@ -10,6 +10,8 @@ import com.cajaclara.app.feature.sales.data.repository.RoomCashCloseRepository
 import com.cajaclara.app.feature.sales.data.repository.RoomSalesRepository
 import com.cajaclara.app.feature.sales.domain.repository.CashCloseRepository
 import com.cajaclara.app.feature.sales.domain.repository.SalesRepository
+import com.cajaclara.app.feature.stats.data.repository.RoomAnalyticsRepository
+import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
 import com.cajaclara.app.feature.stock.data.repository.RoomStockRepository
 import com.cajaclara.app.feature.stock.domain.repository.StockRepository
 import dagger.Binds
@@ -46,4 +48,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindCashCloseRepository(impl: RoomCashCloseRepository): CashCloseRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAnalyticsRepository(impl: RoomAnalyticsRepository): AnalyticsRepository
 }

@@ -3,8 +3,8 @@ package com.cajaclara.app.feature.stats.domain.repository
 import com.cajaclara.app.core.date.DateRange
 import com.cajaclara.app.feature.products.domain.valueobject.ProductId
 import com.cajaclara.app.feature.stats.domain.model.DailyBalance
+import com.cajaclara.app.feature.stats.domain.model.DailySalesPoint
 import com.cajaclara.app.feature.stats.domain.model.ProductPricePoint
-import com.cajaclara.app.feature.stats.domain.model.ProfitPoint
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -18,8 +18,8 @@ interface AnalyticsRepository {
     /** Observe the computed balance for a single [date]. */
     fun observeDailyBalance(date: LocalDate): Flow<DailyBalance>
 
-    /** Observe the profit-over-time series for an inclusive [range]. */
-    fun observeProfitEvolution(range: DateRange): Flow<List<ProfitPoint>>
+    /** Observe the daily sales series (revenue/cost/profit) for an inclusive [range]. */
+    fun observeSalesEvolution(range: DateRange): Flow<List<DailySalesPoint>>
 
     /** Observe a product's cost/price evolution over time. */
     fun observeProductPriceEvolution(productId: ProductId): Flow<List<ProductPricePoint>>

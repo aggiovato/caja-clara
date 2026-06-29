@@ -19,6 +19,9 @@ import com.cajaclara.app.feature.sales.domain.usecase.CloseCashUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.ObserveCashCloseUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.ObserveDailySalesUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.RegisterSaleUseCase
+import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
+import com.cajaclara.app.feature.stats.domain.usecase.ObserveDailyBalanceUseCase
+import com.cajaclara.app.feature.stats.domain.usecase.ObserveSalesEvolutionUseCase
 import com.cajaclara.app.feature.stock.domain.repository.StockRepository
 import com.cajaclara.app.feature.stock.domain.usecase.AdjustStockUseCase
 import dagger.Module
@@ -107,4 +110,12 @@ object UseCaseModule {
     @Provides
     fun provideObserveCashClose(repository: CashCloseRepository): ObserveCashCloseUseCase =
         ObserveCashCloseUseCase(repository)
+
+    @Provides
+    fun provideObserveDailyBalance(repository: AnalyticsRepository): ObserveDailyBalanceUseCase =
+        ObserveDailyBalanceUseCase(repository)
+
+    @Provides
+    fun provideObserveSalesEvolution(repository: AnalyticsRepository): ObserveSalesEvolutionUseCase =
+        ObserveSalesEvolutionUseCase(repository)
 }

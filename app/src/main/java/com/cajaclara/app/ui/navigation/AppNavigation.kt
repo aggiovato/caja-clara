@@ -30,6 +30,7 @@ import com.cajaclara.app.ui.designsystem.AppEmptyState
 import com.cajaclara.app.ui.products.productform.ProductFormScreen
 import com.cajaclara.app.ui.sales.sales.SalesScreen
 import com.cajaclara.app.ui.products.products.ProductsScreen
+import com.cajaclara.app.ui.stats.stats.StatsScreen
 
 /**
  * App root: a bottom-bar [Scaffold] hosting the four top-level tabs plus the product form.
@@ -100,7 +101,7 @@ fun AppNavigation() {
                 )
             }
             composable(Routes.SALES) { SalesScreen() }
-            composable(Routes.STATS) { AppEmptyState(title = "Estadísticas", subtitle = "Próximamente") }
+            composable(Routes.STATS) { StatsScreen() }
             composable(
                 route = Routes.PRODUCT_FORM_PATTERN,
                 arguments = listOf(
