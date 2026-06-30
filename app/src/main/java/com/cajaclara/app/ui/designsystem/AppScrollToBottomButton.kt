@@ -14,6 +14,9 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
+import com.cajaclara.app.ui.theme.CajaClaraTheme
 
 /**
  * A small floating "scroll to end" button. Animates in/out with [visible] (typically bound to
@@ -22,7 +25,7 @@ import androidx.compose.ui.unit.dp
  * scroll action in [onClick].
  */
 @Composable
-fun ScrollToBottomButton(
+fun AppScrollToBottomButton(
     visible: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -44,5 +47,14 @@ fun ScrollToBottomButton(
                 modifier = Modifier.size(20.dp),
             )
         }
+    }
+}
+
+@LightPreview
+@DarkPreview
+@Composable
+private fun AppScrollToBottomButtonPreview() {
+    CajaClaraTheme {
+        AppScrollToBottomButton(visible = true, onClick = {})
     }
 }

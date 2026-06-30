@@ -18,6 +18,9 @@ object Routes {
     const val PRODUCT_FORM = "product_form"
     const val PRODUCT_FORM_PATTERN = "product_form?productId={productId}"
     fun editProduct(id: Long) = "product_form?productId=$id"
+
+    /** Register a purchase (restock/investment). */
+    const val PURCHASE_FORM = "purchase_form"
 }
 
 /** The four bottom-bar tabs, in display order. */

@@ -7,6 +7,7 @@ import com.cajaclara.app.database.SeedCallback
 import com.cajaclara.app.feature.products.data.local.dao.CategoryDao
 import com.cajaclara.app.feature.products.data.local.dao.PriceHistoryDao
 import com.cajaclara.app.feature.products.data.local.dao.ProductDao
+import com.cajaclara.app.feature.purchases.data.local.dao.PurchaseDao
 import com.cajaclara.app.feature.sales.data.local.dao.CashCloseDao
 import com.cajaclara.app.feature.sales.data.local.dao.SaleDao
 import com.cajaclara.app.feature.stock.data.local.dao.StockMovementDao
@@ -50,4 +51,7 @@ object DatabaseModule {
 
     @Provides
     fun provideCashCloseDao(db: AppDatabase): CashCloseDao = db.cashCloseDao()
+
+    @Provides
+    fun providePurchaseDao(db: AppDatabase): PurchaseDao = db.purchaseDao()
 }

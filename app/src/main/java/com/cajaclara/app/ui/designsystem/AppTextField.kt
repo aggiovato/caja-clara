@@ -147,15 +147,15 @@ private fun InfoTooltip(text: String) {
     val scope = rememberCoroutineScope()
     val state = rememberTooltipState(isPersistent = true)
     TooltipBox(
-        // Rich tooltip styled with the app surface (not the default tinted container) and the
-        // app corner radius, so it matches the rest of the UI in light and dark.
+        // Rich tooltip using the standard inverse surface (dark on light, light on dark), so
+        // it matches the plain tooltips and stands out from the content in both themes.
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
         tooltip = {
             RichTooltip(
                 shape = RoundedCornerShape(AppCornerRadius),
                 colors = TooltipDefaults.richTooltipColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
                 ),
             ) { Text(text) }
         },

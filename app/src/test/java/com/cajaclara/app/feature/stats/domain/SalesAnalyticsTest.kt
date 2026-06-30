@@ -2,6 +2,8 @@ package com.cajaclara.app.feature.stats.domain
 
 import com.cajaclara.app.core.date.DateRange
 import com.cajaclara.app.core.money.Money
+import com.cajaclara.app.feature.purchases.domain.model.Purchase
+import com.cajaclara.app.feature.purchases.domain.valueobject.PurchaseId
 import com.cajaclara.app.feature.sales.domain.model.Sale
 import com.cajaclara.app.feature.sales.domain.valueobject.SaleId
 import org.junit.Assert.assertEquals
@@ -64,5 +66,28 @@ class SalesAnalyticsTest {
         assertEquals(Money.fromPesos("15,00"), points[0].revenue) // 10+5
         assertEquals(Money.fromPesos("4,00"), points[0].cost) // 3+1
         assertEquals(Money.fromPesos("11,00"), points[0].profit)
+    }
+
+    private fun purchase(day: String, investment: String) = Purchase(
+        id = PurchaseId(day.hashCode().toLong()),
+        purchasedAt = Instant.parse("${day}T09:00:00Z"),
+        totalInvestment = Money.fromPesos(investment),
+        createdAt = Instant.parse("${day}T09:00:00Z"),
+    )
+
+    @Test
+    fun `cashFlow pairs sales in and purchases out per day`() {
+        val range = DateRange(LocalDate.of(2026, 6, 28), LocalDate.of(2026, 6, 29))
+        val sales = listOf(sale("2026-06-29", "30,00", "10,00"))
+        val purchases = listOf(purchase("2026-06-28", "50,00"), purchase("2026-06-29", "5,00"))
+        val points = SalesAnalytics.cashFlow(range, sales, purchases, zone)
+
+        assertEquals(2, points.size)
+        assertEquals(Money.ZERO, points[0].salesRevenue) // 28th: only a purchase
+        assertEquals(Money.fromPesos("50,00"), points[0].purchaseInvestment)
+        assertEquals(Money.fromPesos("-50,00"), points[0].net)
+        assertEquals(Money.fromPesos("30,00"), points[1].salesRevenue)
+        assertEquals(Money.fromPesos("5,00"), points[1].purchaseInvestment)
+        assertEquals(Money.fromPesos("25,00"), points[1].net) // 30 in - 5 out
     }
 }

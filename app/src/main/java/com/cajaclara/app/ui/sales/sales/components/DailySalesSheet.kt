@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,8 +32,12 @@ import com.cajaclara.app.feature.sales.domain.model.Sale
 import com.cajaclara.app.ui.designsystem.AppMoneyText
 import com.cajaclara.app.ui.designsystem.AppPrimaryButton
 import com.cajaclara.app.ui.designsystem.AppTextField
-import com.cajaclara.app.ui.designsystem.ScrollToBottomButton
+import com.cajaclara.app.ui.designsystem.AppScrollToBottomButton
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
+import com.cajaclara.app.ui.preview.PreviewSamples
 import com.cajaclara.app.ui.sales.sales.SalesUiState
+import com.cajaclara.app.ui.theme.CajaClaraTheme
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -85,7 +90,7 @@ internal fun DailySalesSheet(
                     CashCloseSummary(state.cashClose!!, currentExpected = state.dailyExpected)
                 }
             }
-            ScrollToBottomButton(
+            AppScrollToBottomButton(
                 visible = scrollState.canScrollForward,
                 onClick = { scope.launch { scrollState.animateScrollTo(scrollState.maxValue) } },
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
@@ -209,5 +214,20 @@ private fun CashCloseForm(expected: Money, isReClose: Boolean, isSaving: Boolean
             enabled = !isSaving,
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+}
+
+@LightPreview
+@DarkPreview
+@Composable
+private fun DailySalesSheetPreview() {
+    CajaClaraTheme {
+        Surface {
+            DailySalesSheet(
+                state = SalesUiState(dailySales = PreviewSamples.sales(), isLoading = false),
+                isSaving = false,
+                onClose = {},
+            )
+        }
     }
 }

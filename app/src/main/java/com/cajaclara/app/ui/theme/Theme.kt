@@ -40,6 +40,9 @@ private val LightColorScheme = lightColorScheme(
     surfaceContainerHighest = SurfaceContainerHighestLight,
     outline = SoftGray,
     outlineVariant = CloudGray,
+    // Inverse (tooltips, snackbars): dark surface with light text in light mode.
+    inverseSurface = Graphite,
+    inverseOnSurface = WarmWhite,
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -74,6 +77,9 @@ private val DarkColorScheme = darkColorScheme(
     surfaceContainerHighest = SurfaceContainerHighestDark,
     outline = DarkBorder,
     outlineVariant = DarkSurface,
+    // Inverse (tooltips, snackbars): light surface with dark text in dark mode.
+    inverseSurface = CloudGray,
+    inverseOnSurface = Graphite,
 )
 
 @Composable

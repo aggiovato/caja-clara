@@ -31,8 +31,14 @@ import com.cajaclara.app.feature.stats.domain.model.DailyBalance
 import com.cajaclara.app.ui.designsystem.AppCard
 import com.cajaclara.app.ui.designsystem.AppLoadingState
 import com.cajaclara.app.ui.designsystem.AppMoneyText
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
+import com.cajaclara.app.ui.preview.PreviewSamples
+import com.cajaclara.app.ui.stats.stats.components.CashFlowChart
 import com.cajaclara.app.ui.stats.stats.components.ProfitBarChart
 import com.cajaclara.app.ui.stats.stats.components.SalesCostLineChart
+import com.cajaclara.app.ui.theme.CajaClaraTheme
+import java.time.LocalDate
 
 @Composable
 fun StatsScreen(viewModel: StatsViewModel = hiltViewModel()) {
@@ -105,6 +111,29 @@ private fun StatsScreen(state: StatsUiState, onRangeSelected: (Int) -> Unit) {
                     SalesCostLineChart(points = state.salesPoints)
                 }
             }
+
+            Text("Caja: ventas vs compras", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            AppCard(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            "Balance ${state.rangeDays} días",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        AppMoneyText(
+                            state.rangeCashBalance,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = if (state.rangeCashBalance.isNegative) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                    CashFlowChart(points = state.cashPoints)
+                }
+            }
         }
     }
 }
@@ -166,5 +195,30 @@ private fun RangeSelector(selected: Int, onRangeSelected: (Int) -> Unit) {
                 ),
             )
         }
+    }
+}
+
+@LightPreview
+@DarkPreview
+@Composable
+private fun StatsScreenPreview() {
+    val balance = DailyBalance(
+        date = LocalDate.of(2026, 6, 30),
+        salesRevenue = Money.fromPesos("40,00"),
+        salesCost = Money.fromPesos("16,00"),
+        manualProfit = Money.ZERO,
+        salesCount = 3,
+        productsSoldCount = 5,
+    )
+    CajaClaraTheme {
+        StatsScreen(
+            state = StatsUiState(
+                dailyBalance = balance,
+                salesPoints = PreviewSamples.salesPoints(),
+                cashPoints = PreviewSamples.cashPoints(),
+                isLoading = false,
+            ),
+            onRangeSelected = {},
+        )
     }
 }

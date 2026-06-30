@@ -4,7 +4,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -24,6 +26,10 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cajaclara.app.feature.stats.domain.model.DailySalesPoint
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
+import com.cajaclara.app.ui.preview.PreviewSamples
+import com.cajaclara.app.ui.theme.CajaClaraTheme
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.max
@@ -103,6 +109,15 @@ internal fun ProfitBarChart(
         if (selected in values.indices) {
             drawTooltip(measurer, points[selected], selected, slot, tooltipBg, tooltipText)
         }
+    }
+}
+
+@LightPreview
+@DarkPreview
+@Composable
+private fun ProfitBarChartPreview() {
+    CajaClaraTheme {
+        Surface { ProfitBarChart(PreviewSamples.salesPoints(), Modifier.padding(16.dp)) }
     }
 }
 

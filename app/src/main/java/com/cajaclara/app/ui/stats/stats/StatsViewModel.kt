@@ -3,6 +3,7 @@ package com.cajaclara.app.ui.stats.stats
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cajaclara.app.core.date.DateRange
+import com.cajaclara.app.feature.stats.domain.usecase.ObserveCashFlowUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveDailyBalanceUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveSalesEvolutionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,19 +23,27 @@ import javax.inject.Inject
 class StatsViewModel @Inject constructor(
     observeDailyBalance: ObserveDailyBalanceUseCase,
     observeSalesEvolution: ObserveSalesEvolutionUseCase,
+    observeCashFlow: ObserveCashFlowUseCase,
     clock: Clock,
 ) : ViewModel() {
 
     private val today: LocalDate = LocalDate.now(clock)
     private val rangeDays = MutableStateFlow(7)
 
-    private val series = rangeDays.flatMapLatest { days ->
-        observeSalesEvolution(DateRange(today.minusDays((days - 1).toLong()), today))
-    }
+    private fun range(days: Int) = DateRange(today.minusDays((days - 1).toLong()), today)
+
+    private val series = rangeDays.flatMapLatest { days -> observeSalesEvolution(range(days)) }
+    private val cash = rangeDays.flatMapLatest { days -> observeCashFlow(range(days)) }
 
     val state: StateFlow<StatsUiState> =
-        combine(observeDailyBalance(today), rangeDays, series) { balance, days, points ->
-            StatsUiState(dailyBalance = balance, rangeDays = days, salesPoints = points, isLoading = false)
+        combine(observeDailyBalance(today), rangeDays, series, cash) { balance, days, points, cashPoints ->
+            StatsUiState(
+                dailyBalance = balance,
+                rangeDays = days,
+                salesPoints = points,
+                cashPoints = cashPoints,
+                isLoading = false,
+            )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsUiState())
 
     fun onRangeSelected(days: Int) {

@@ -1,6 +1,5 @@
 package com.cajaclara.app.ui.sales.sales.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -23,8 +22,12 @@ import com.cajaclara.app.feature.products.domain.model.Product
 import com.cajaclara.app.ui.designsystem.AppCard
 import com.cajaclara.app.ui.designsystem.AppMoneyText
 import com.cajaclara.app.ui.designsystem.AppProductImage
+import com.cajaclara.app.ui.preview.DarkPreview
+import com.cajaclara.app.ui.preview.LightPreview
+import com.cajaclara.app.ui.preview.PreviewSamples
 import com.cajaclara.app.ui.products.categoryIcon
 import com.cajaclara.app.ui.theme.AppCornerRadius
+import com.cajaclara.app.ui.theme.CajaClaraTheme
 
 /** A product row in quick sale: thumbnail, name/price/stock and an add / quantity stepper. */
 @Composable
@@ -97,5 +100,20 @@ private fun StepButton(
         modifier = Modifier.size(36.dp),
     ) {
         Icon(icon, contentDescription = contentDescription, modifier = Modifier.padding(6.dp))
+    }
+}
+
+@LightPreview
+@DarkPreview
+@Composable
+private fun SaleProductItemPreview() {
+    CajaClaraTheme {
+        SaleProductItem(
+            product = PreviewSamples.product(),
+            categoryName = "Bebidas",
+            quantityInCart = 2,
+            onAdd = {},
+            onRemove = {},
+        )
     }
 }

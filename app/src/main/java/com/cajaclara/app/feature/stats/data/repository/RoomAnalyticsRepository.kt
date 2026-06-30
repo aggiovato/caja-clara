@@ -3,10 +3,13 @@ package com.cajaclara.app.feature.stats.data.repository
 import com.cajaclara.app.core.date.DateRange
 import com.cajaclara.app.feature.products.data.local.dao.PriceHistoryDao
 import com.cajaclara.app.feature.products.domain.valueobject.ProductId
+import com.cajaclara.app.feature.purchases.data.local.dao.PurchaseDao
+import com.cajaclara.app.feature.purchases.data.mapper.toDomain as purchaseToDomain
 import com.cajaclara.app.feature.sales.data.local.dao.SaleDao
 import com.cajaclara.app.feature.sales.data.mapper.toDomain
 import com.cajaclara.app.feature.stats.domain.SalesAnalytics
 import com.cajaclara.app.feature.stats.domain.model.DailyBalance
+import com.cajaclara.app.feature.stats.domain.model.DailyCashPoint
 import com.cajaclara.app.feature.stats.domain.model.DailySalesPoint
 import com.cajaclara.app.feature.stats.domain.model.ProductPricePoint
 import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
@@ -22,6 +25,7 @@ import javax.inject.Inject
 /** Room-backed [AnalyticsRepository]: aggregates sales and price history into the stats models. */
 class RoomAnalyticsRepository @Inject constructor(
     private val saleDao: SaleDao,
+    private val purchaseDao: PurchaseDao,
     private val priceHistoryDao: PriceHistoryDao,
     private val zoneId: ZoneId,
 ) : AnalyticsRepository {
@@ -42,6 +46,22 @@ class RoomAnalyticsRepository @Inject constructor(
         val end = startMillis(range.end.plusDays(1))
         return saleDao.observeBetween(start, end).map { sales ->
             SalesAnalytics.salesEvolution(range, sales.map { it.toDomain() }, zoneId)
+        }
+    }
+
+    override fun observeCashFlow(range: DateRange): Flow<List<DailyCashPoint>> {
+        val start = startMillis(range.start)
+        val end = startMillis(range.end.plusDays(1))
+        return combine(
+            saleDao.observeBetween(start, end),
+            purchaseDao.observeBetween(start, end),
+        ) { sales, purchases ->
+            SalesAnalytics.cashFlow(
+                range,
+                sales.map { it.toDomain() },
+                purchases.map { it.purchaseToDomain() },
+                zoneId,
+            )
         }
     }
 

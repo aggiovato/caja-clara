@@ -14,10 +14,12 @@ import com.cajaclara.app.feature.products.domain.valueobject.ProductId
 import com.cajaclara.app.core.money.Money
 import com.cajaclara.app.core.quantity.Quantity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,6 +27,7 @@ import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SalesViewModel @Inject constructor(
     observeProducts: ObserveProductsUseCase,
@@ -36,9 +39,12 @@ class SalesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val today: LocalDate = LocalDate.now(clock)
+    private val query = MutableStateFlow("")
 
-    // Only active (sellable) products appear in quick sale.
-    private val activeProducts = observeProducts(ProductFilter(status = ProductStatus.ACTIVE))
+    // Only active (sellable) products appear in quick sale; filtered by the search query.
+    private val activeProducts = query.flatMapLatest { q ->
+        observeProducts(ProductFilter(status = ProductStatus.ACTIVE, query = q.ifBlank { null }))
+    }
     private val dailySales = observeDailySales(today)
     private val cashClose = observeCashClose(today)
 
@@ -60,6 +66,8 @@ class SalesViewModel @Inject constructor(
                 cashClose = close,
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SalesUiState())
+
+    fun onQueryChange(text: String) { query.value = text }
 
     /** Add one unit, capped at the product's available stock. */
     fun add(productId: Long, available: Int) {

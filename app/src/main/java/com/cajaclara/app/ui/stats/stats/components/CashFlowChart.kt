@@ -1,6 +1,7 @@
 package com.cajaclara.app.ui.stats.stats.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,18 +18,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.background
-import com.cajaclara.app.feature.stats.domain.model.DailySalesPoint
+import com.cajaclara.app.feature.stats.domain.model.DailyCashPoint
 import com.cajaclara.app.ui.preview.DarkPreview
 import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.preview.PreviewSamples
@@ -38,70 +37,70 @@ import kotlin.math.max
 
 private val dayFormatter = DateTimeFormatter.ofPattern("d/M")
 
-/** Connected-points line chart of daily revenue and cost, with a legend and day labels. */
+/**
+ * Cash-flow chart: each day shows sales going up (green) and purchase investment going down
+ * (red) from a central baseline, on a shared scale. Cash flow, not sales profit.
+ */
 @Composable
-internal fun SalesCostLineChart(
-    points: List<DailySalesPoint>,
+internal fun CashFlowChart(
+    points: List<DailyCashPoint>,
     modifier: Modifier = Modifier,
 ) {
-    val revenueColor = MaterialTheme.colorScheme.primary
-    val costColor = MaterialTheme.colorScheme.error
+    val salesColor = MaterialTheme.colorScheme.secondary
+    val purchaseColor = MaterialTheme.colorScheme.error
+    val baselineColor = MaterialTheme.colorScheme.outline
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-    val gridColor = MaterialTheme.colorScheme.outline
     val measurer = rememberTextMeasurer()
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            LegendItem("Ventas", revenueColor)
-            LegendItem("Costes", costColor)
+            LegendDot("Ventas", salesColor)
+            LegendDot("Compras", purchaseColor)
         }
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(170.dp),
+                .height(190.dp),
         ) {
             if (points.isEmpty()) return@Canvas
             val labelHeight = 18.dp.toPx()
-            val chartHeight = size.height - labelHeight
-            val maxValue = max(
-                points.maxOf { it.revenue.cents },
-                points.maxOf { it.cost.cents },
+            val plotHeight = size.height - labelHeight
+            val baselineY = plotHeight / 2f
+            val maxMagnitude = max(
+                points.maxOf { it.salesRevenue.cents },
+                points.maxOf { it.purchaseInvestment.cents },
             ).coerceAtLeast(1L).toFloat()
+            val halfHeight = baselineY
 
-            fun y(cents: Long) = chartHeight - (cents / maxValue) * chartHeight
-            fun x(i: Int) = if (points.size == 1) size.width / 2 else size.width * i / (points.size - 1)
+            val n = points.size
+            val slot = size.width / n
+            val barWidth = slot * 0.5f
+            val gap = (slot - barWidth) / 2f
 
-            // Baseline.
-            drawLine(gridColor, Offset(0f, chartHeight), Offset(size.width, chartHeight), strokeWidth = 1.dp.toPx())
+            drawLine(baselineColor, Offset(0f, baselineY), Offset(size.width, baselineY), strokeWidth = 1.dp.toPx())
 
-            drawSeries(points.map { it.revenue.cents }, ::x, ::y, revenueColor)
-            drawSeries(points.map { it.cost.cents }, ::x, ::y, costColor)
-
-            // Day labels (thinned).
-            val step = dayLabelStep(points.size)
+            val step = dayLabelStep(n)
             points.forEachIndexed { i, p ->
-                if (i % step == 0 || i == points.size - 1) {
+                val x = i * slot + gap
+                val salesH = (p.salesRevenue.cents / maxMagnitude) * halfHeight
+                val purchaseH = (p.purchaseInvestment.cents / maxMagnitude) * halfHeight
+                if (salesH > 0f) {
+                    drawRoundRect(salesColor, Offset(x, baselineY - salesH), Size(barWidth, salesH), CornerRadius(4f, 4f))
+                }
+                if (purchaseH > 0f) {
+                    drawRoundRect(purchaseColor, Offset(x, baselineY), Size(barWidth, purchaseH), CornerRadius(4f, 4f))
+                }
+                if (i % step == 0 || i == n - 1) {
                     val label = measurer.measure(p.date.format(dayFormatter), TextStyle(fontSize = 9.sp, color = labelColor))
-                    drawText(label, topLeft = Offset((x(i) - label.size.width / 2).coerceIn(0f, size.width - label.size.width), chartHeight + 3.dp.toPx()))
+                    drawText(label, topLeft = Offset(x + barWidth / 2 - label.size.width / 2, plotHeight + 3.dp.toPx()))
                 }
             }
         }
     }
 }
 
-private fun DrawScope.drawSeries(values: List<Long>, x: (Int) -> Float, y: (Long) -> Float, color: Color) {
-    val path = Path()
-    values.forEachIndexed { i, v ->
-        val px = x(i)
-        val py = y(v)
-        if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
-    }
-    drawPath(path, color, style = Stroke(width = 2.dp.toPx()))
-    values.forEachIndexed { i, v -> drawCircle(color, radius = 3.dp.toPx(), center = Offset(x(i), y(v))) }
-}
-
 @Composable
-private fun LegendItem(label: String, color: Color) {
+private fun LegendDot(label: String, color: Color) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(color))
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -111,8 +110,8 @@ private fun LegendItem(label: String, color: Color) {
 @LightPreview
 @DarkPreview
 @Composable
-private fun SalesCostLineChartPreview() {
+private fun CashFlowChartPreview() {
     CajaClaraTheme {
-        Surface { SalesCostLineChart(PreviewSamples.salesPoints(), Modifier.padding(16.dp)) }
+        Surface { CashFlowChart(PreviewSamples.cashPoints(), Modifier.padding(16.dp)) }
     }
 }

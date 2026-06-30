@@ -30,6 +30,7 @@ import com.cajaclara.app.ui.designsystem.AppEmptyState
 import com.cajaclara.app.ui.products.productform.ProductFormScreen
 import com.cajaclara.app.ui.sales.sales.SalesScreen
 import com.cajaclara.app.ui.products.products.ProductsScreen
+import com.cajaclara.app.ui.purchases.purchaseform.PurchaseFormScreen
 import com.cajaclara.app.ui.stats.stats.StatsScreen
 
 /**
@@ -100,7 +101,9 @@ fun AppNavigation() {
                     onEditProduct = { id -> navController.navigate(Routes.editProduct(id.value)) },
                 )
             }
-            composable(Routes.SALES) { SalesScreen() }
+            composable(Routes.SALES) {
+                SalesScreen(onRegisterPurchase = { navController.navigate(Routes.PURCHASE_FORM) })
+            }
             composable(Routes.STATS) { StatsScreen() }
             composable(
                 route = Routes.PRODUCT_FORM_PATTERN,
@@ -109,6 +112,9 @@ fun AppNavigation() {
                 ),
             ) {
                 ProductFormScreen(onDone = { navController.popBackStack() })
+            }
+            composable(Routes.PURCHASE_FORM) {
+                PurchaseFormScreen(onDone = { navController.popBackStack() })
             }
         }
     }

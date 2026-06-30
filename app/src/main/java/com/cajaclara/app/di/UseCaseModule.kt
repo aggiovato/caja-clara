@@ -13,6 +13,8 @@ import com.cajaclara.app.feature.products.domain.usecase.SuggestSkuUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductCostUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductPvpUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductUseCase
+import com.cajaclara.app.feature.purchases.domain.repository.PurchasesRepository
+import com.cajaclara.app.feature.purchases.domain.usecase.RegisterPurchaseUseCase
 import com.cajaclara.app.feature.sales.domain.repository.CashCloseRepository
 import com.cajaclara.app.feature.sales.domain.repository.SalesRepository
 import com.cajaclara.app.feature.sales.domain.usecase.CloseCashUseCase
@@ -20,6 +22,7 @@ import com.cajaclara.app.feature.sales.domain.usecase.ObserveCashCloseUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.ObserveDailySalesUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.RegisterSaleUseCase
 import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
+import com.cajaclara.app.feature.stats.domain.usecase.ObserveCashFlowUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveDailyBalanceUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveSalesEvolutionUseCase
 import com.cajaclara.app.feature.stock.domain.repository.StockRepository
@@ -118,4 +121,17 @@ object UseCaseModule {
     @Provides
     fun provideObserveSalesEvolution(repository: AnalyticsRepository): ObserveSalesEvolutionUseCase =
         ObserveSalesEvolutionUseCase(repository)
+
+    @Provides
+    fun provideObserveCashFlow(repository: AnalyticsRepository): ObserveCashFlowUseCase =
+        ObserveCashFlowUseCase(repository)
+
+    @Provides
+    fun provideRegisterPurchase(
+        purchasesRepository: PurchasesRepository,
+        productRepository: ProductRepository,
+        stockRepository: StockRepository,
+        clock: Clock,
+    ): RegisterPurchaseUseCase =
+        RegisterPurchaseUseCase(purchasesRepository, productRepository, stockRepository, clock)
 }

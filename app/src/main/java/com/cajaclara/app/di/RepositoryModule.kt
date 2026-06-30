@@ -6,6 +6,8 @@ import com.cajaclara.app.feature.products.data.repository.RoomCategoryRepository
 import com.cajaclara.app.feature.products.data.repository.RoomProductRepository
 import com.cajaclara.app.feature.products.domain.repository.CategoryRepository
 import com.cajaclara.app.feature.products.domain.repository.ProductRepository
+import com.cajaclara.app.feature.purchases.data.repository.RoomPurchasesRepository
+import com.cajaclara.app.feature.purchases.domain.repository.PurchasesRepository
 import com.cajaclara.app.feature.sales.data.repository.RoomCashCloseRepository
 import com.cajaclara.app.feature.sales.data.repository.RoomSalesRepository
 import com.cajaclara.app.feature.sales.domain.repository.CashCloseRepository
@@ -52,4 +54,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAnalyticsRepository(impl: RoomAnalyticsRepository): AnalyticsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPurchasesRepository(impl: RoomPurchasesRepository): PurchasesRepository
 }
