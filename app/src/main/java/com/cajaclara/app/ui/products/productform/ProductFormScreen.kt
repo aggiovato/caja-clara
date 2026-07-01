@@ -1,5 +1,9 @@
 package com.cajaclara.app.ui.products.productform
 
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,24 +25,38 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +67,7 @@ import com.cajaclara.app.feature.products.domain.model.ProductStatus
 import com.cajaclara.app.feature.products.domain.valueobject.CategoryId
 import com.cajaclara.app.ui.designsystem.AppConfirmDialog
 import com.cajaclara.app.ui.designsystem.AppDropdownField
+import com.cajaclara.app.ui.designsystem.AppErrorBanner
 import com.cajaclara.app.ui.designsystem.AppIconButton
 import com.cajaclara.app.ui.designsystem.AppPrimaryButton
 import com.cajaclara.app.ui.designsystem.AppSecondaryButton
@@ -57,6 +76,7 @@ import com.cajaclara.app.ui.preview.DarkPreview
 import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.products.categoryIcon
 import com.cajaclara.app.ui.products.productform.components.ImagePickerField
+import com.cajaclara.app.ui.products.productform.components.ProductShareCard
 import com.cajaclara.app.ui.products.productform.components.ReadOnlyField
 import com.cajaclara.app.ui.products.productform.components.ValueEditDialog
 import com.cajaclara.app.ui.theme.CajaClaraTheme
@@ -101,6 +121,13 @@ fun ProductFormScreen(
         snapshotFlow { name.text.toString() }.collect(viewModel::onNameChanged)
     }
 
+    // Clear the error banner as soon as the user edits any field (so it never stays stale).
+    LaunchedEffect(Unit) {
+        snapshotFlow {
+            listOf(name.text, cost.text, pvp.text, stock.text, sku.text, description.text).joinToString("|")
+        }.drop(1).collect { viewModel.onErrorShown() }
+    }
+
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
 
     ProductFormContent(
@@ -126,6 +153,8 @@ fun ProductFormScreen(
         onChangeStock = viewModel::changeStock,
         onTogglePause = viewModel::togglePause,
         onArchive = viewModel::archive,
+        onShare = viewModel::shareProductImage,
+        onShareHandled = viewModel::onShareHandled,
         onCancel = onDone,
         onSave = {
             viewModel.save(
@@ -159,12 +188,25 @@ private fun ProductFormContent(
     onChangeStock: (String) -> Unit,
     onTogglePause: () -> Unit,
     onArchive: () -> Unit,
+    onShare: (Bitmap) -> Unit,
+    onShareHandled: () -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
 ) {
     var editingValue by remember { mutableStateOf<EditTarget?>(null) }
     var showPauseConfirm by remember { mutableStateOf(false) }
     var showArchiveConfirm by remember { mutableStateOf(false) }
+    var showShareSheet by remember { mutableStateOf(false) }
+
+    // When the shareable image is ready, fire the share intent and reset the one-shot signal.
+    val context = LocalContext.current
+    LaunchedEffect(state.shareImageUri) {
+        state.shareImageUri?.let { uri ->
+            shareImageToWhatsApp(context, uri)
+            showShareSheet = false
+            onShareHandled()
+        }
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -177,6 +219,13 @@ private fun ProductFormContent(
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+                actions = {
+                    if (state.isEdit) {
+                        IconButton(onClick = { showShareSheet = true }) {
+                            Icon(Icons.Filled.Share, contentDescription = "Compartir")
+                        }
                     }
                 },
                 windowInsets = WindowInsets(0, 0, 0, 0),
@@ -260,13 +309,7 @@ private fun ProductFormContent(
             )
             AppTextField(description, label = "Descripción (opcional)", singleLine = false, minLines = 4)
 
-            if (state.error != null) {
-                Text(
-                    text = state.error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
+            state.error?.let { AppErrorBanner(it) }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -324,6 +367,87 @@ private fun ProductFormContent(
             onDismiss = { showArchiveConfirm = false },
         )
     }
+
+    if (showShareSheet) {
+        ProductShareSheet(
+            imagePath = state.imagePath,
+            fallbackIcon = categoryIcon(state.selectedCategory?.name),
+            name = name.text.toString(),
+            price = state.currentPvp?.format().orEmpty(),
+            storeAddress = state.storeAddress,
+            onShare = onShare,
+            onDismiss = { showShareSheet = false },
+        )
+    }
+}
+
+/**
+ * Bottom sheet that previews the shareable product card and, on confirm, captures it to a
+ * bitmap (via a graphics layer) and hands it back through [onShare] so it can be shared.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProductShareSheet(
+    imagePath: String?,
+    fallbackIcon: ImageVector,
+    name: String,
+    price: String,
+    storeAddress: String,
+    onShare: (Bitmap) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val graphicsLayer = rememberGraphicsLayer()
+    val scope = rememberCoroutineScope()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text("Compartir producto", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            ProductShareCard(
+                imagePath = imagePath,
+                fallbackIcon = fallbackIcon,
+                name = name,
+                price = price,
+                storeAddress = storeAddress,
+                modifier = Modifier
+                    .fillMaxWidth(0.62f)
+                    .drawWithContent {
+                        // Record the card into the layer, then draw it so the preview stays visible.
+                        graphicsLayer.record { this@drawWithContent.drawContent() }
+                        drawLayer(graphicsLayer)
+                    },
+            )
+            AppPrimaryButton(
+                text = "Compartir por WhatsApp",
+                onClick = {
+                    scope.launch { onShare(graphicsLayer.toImageBitmap().asAndroidBitmap()) }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/**
+ * Share [uri] (a PNG) preferring WhatsApp; falls back to the system chooser when WhatsApp is
+ * not installed (e.g. only the business variant, or none).
+ */
+private fun shareImageToWhatsApp(context: Context, uri: Uri) {
+    val base = Intent(Intent.ACTION_SEND).apply {
+        type = "image/png"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    val whatsapp = Intent(base).setPackage("com.whatsapp")
+    runCatching { context.startActivity(whatsapp) }
+        .onFailure { context.startActivity(Intent.createChooser(base, "Compartir producto")) }
 }
 
 @LightPreview
@@ -349,6 +473,8 @@ private fun ProductFormScreenPreview() {
             onChangeStock = {},
             onTogglePause = {},
             onArchive = {},
+            onShare = {},
+            onShareHandled = {},
             onCancel = {},
             onSave = {},
         )

@@ -5,6 +5,9 @@ import com.cajaclara.app.core.quantity.Quantity
 import com.cajaclara.app.feature.products.domain.model.Product
 import com.cajaclara.app.feature.products.domain.model.ProductStatus
 import com.cajaclara.app.feature.products.domain.valueobject.ProductId
+import com.cajaclara.app.feature.settings.domain.model.AppSettings
+import com.cajaclara.app.feature.settings.domain.repository.SettingsRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.fail
 import java.time.Instant
 
@@ -17,6 +20,13 @@ inline fun <reified T : Throwable> assertThrowsOf(block: () -> Unit) {
         throw e
     }
     fail("Expected ${T::class.simpleName} but nothing was thrown")
+}
+
+/** In-memory [SettingsRepository] for use-case tests; defaults to no minimum margin. */
+class FakeSettingsRepository(minMarginPercent: Double = 0.0) : SettingsRepository {
+    private val flow = MutableStateFlow(AppSettings(minMarginPercent = minMarginPercent))
+    override fun observe() = flow
+    override suspend fun update(settings: AppSettings) { flow.value = settings }
 }
 
 /** A ready-to-use product for tests (unsaved, EPOCH timestamps). */

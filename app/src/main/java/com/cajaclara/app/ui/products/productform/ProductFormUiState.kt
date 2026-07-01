@@ -1,5 +1,6 @@
 package com.cajaclara.app.ui.products.productform
 
+import android.net.Uri
 import com.cajaclara.app.core.money.Money
 import com.cajaclara.app.core.quantity.Quantity
 import com.cajaclara.app.feature.products.domain.model.Category
@@ -21,6 +22,10 @@ data class ProductFormUiState(
     val categories: List<Category> = emptyList(),
     val selectedCategory: Category? = null,
     val imagePath: String? = null,
+    /** The shop address shown on the shareable image; blank means none configured. */
+    val storeAddress: String = "",
+    /** One-shot: set to the saved shareable image URI so the screen fires the share intent. */
+    val shareImageUri: Uri? = null,
     val isSaving: Boolean = false,
     val error: String? = null,
     val saved: Boolean = false,

@@ -61,6 +61,9 @@ private val circles = listOf(
 @Composable
 fun AppBackground(
     modifier: Modifier = Modifier,
+    // Shrinks the decorative circles (radius + drift) for smaller surfaces such as the
+    // shareable product card, where full-screen-sized circles would look oversized.
+    circleScale: Float = 1f,
     content: @Composable () -> Unit,
 ) {
     val primary = MaterialTheme.colorScheme.primary
@@ -84,33 +87,34 @@ fun AppBackground(
         Canvas(Modifier.fillMaxSize()) {
             drawRect(background)
             val angle = progress * 2f * PI.toFloat()
-            circles.forEach { c -> drawDecorCircle(c, primary, angle) }
+            circles.forEach { c -> drawDecorCircle(c, primary, angle, circleScale) }
         }
         content()
     }
 }
 
-private fun DrawScope.drawDecorCircle(c: DecorCircle, primary: Color, angle: Float) {
-    val drift = c.driftDp.dp.toPx()
+private fun DrawScope.drawDecorCircle(c: DecorCircle, primary: Color, angle: Float, circleScale: Float) {
+    val drift = c.driftDp.dp.toPx() * circleScale
     // Elliptical drift around the resting point (sin/cos with a per-circle phase offset).
     val dx = cos(angle + c.phase) * drift
     val dy = sin(angle + c.phase) * drift * 0.7f
     val center = Offset(size.width * c.xFraction + dx, size.height * c.yFraction + dy)
-    val radius = c.radiusDp.dp.toPx()
+    val radius = c.radiusDp.dp.toPx() * circleScale
     val color = primary.copy(alpha = c.alpha)
     when (c.style) {
         CircleStyle.FILLED -> drawCircle(color = color, radius = radius, center = center)
         CircleStyle.OUTLINE -> drawCircle(color = color, radius = radius, center = center, style = Stroke(width = 2.dp.toPx()))
-        CircleStyle.STRIPED -> drawStripedCircle(color, center, radius)
+        CircleStyle.STRIPED -> drawStripedCircle(color, center, radius, circleScale)
     }
 }
 
 /** Hatched fill: diagonal stripes clipped to the circle. */
-private fun DrawScope.drawStripedCircle(color: Color, center: Offset, radius: Float) {
+private fun DrawScope.drawStripedCircle(color: Color, center: Offset, radius: Float, circleScale: Float) {
     val circlePath = Path().apply {
         addOval(Rect(center.x - radius, center.y - radius, center.x + radius, center.y + radius))
     }
-    val spacing = 9.dp.toPx()
+    // Keep the hatch density proportional to the circle so it doesn't look cramped when scaled.
+    val spacing = 9.dp.toPx() * circleScale
     val strokeWidth = 2.dp.toPx()
     clipPath(circlePath) {
         // 45° lines (slope 1). Sweep the top x-intercept wide enough that every line crossing
