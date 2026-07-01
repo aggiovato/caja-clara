@@ -27,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cajaclara.app.ui.designsystem.AppBackground
 import com.cajaclara.app.ui.designsystem.AppEmptyState
+import com.cajaclara.app.ui.home.home.HomeScreen
 import com.cajaclara.app.ui.products.productform.ProductFormScreen
 import com.cajaclara.app.ui.sales.sales.SalesScreen
 import com.cajaclara.app.ui.products.products.ProductsScreen
@@ -94,7 +95,20 @@ fun AppNavigation() {
             startDestination = Routes.PRODUCTS,
             modifier = Modifier.padding(padding),
         ) {
-            composable(Routes.HOME) { AppEmptyState(title = "Inicio", subtitle = "Próximamente") }
+            composable(Routes.HOME) {
+                HomeScreen(
+                    onNewSale = {
+                        navController.navigate(Routes.SALES) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onRegisterPurchase = { navController.navigate(Routes.PURCHASE_FORM) },
+                    onNewProduct = { navController.navigate(Routes.PRODUCT_FORM) },
+                    onSettings = { navController.navigate(Routes.SETTINGS) },
+                )
+            }
             composable(Routes.PRODUCTS) {
                 ProductsScreen(
                     onAddProduct = { navController.navigate(Routes.PRODUCT_FORM) },
@@ -115,6 +129,9 @@ fun AppNavigation() {
             }
             composable(Routes.PURCHASE_FORM) {
                 PurchaseFormScreen(onDone = { navController.popBackStack() })
+            }
+            composable(Routes.SETTINGS) {
+                AppEmptyState(title = "Configuración", subtitle = "Próximamente")
             }
         }
     }

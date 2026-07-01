@@ -28,6 +28,10 @@ interface PurchaseDao {
     @Query("SELECT * FROM purchases WHERE purchasedAt >= :startMillis AND purchasedAt < :endMillis ORDER BY purchasedAt DESC")
     fun observeBetween(startMillis: Long, endMillis: Long): Flow<List<PurchaseEntity>>
 
+    /** Total investment across all purchases ever (for the business account balance). */
+    @Query("SELECT COALESCE(SUM(totalInvestmentCents), 0) FROM purchases")
+    fun observeTotalInvestment(): Flow<Long>
+
     @Query("SELECT * FROM purchase_lines WHERE purchaseId = :purchaseId")
     suspend fun linesForPurchase(purchaseId: Long): List<PurchaseLineEntity>
 }

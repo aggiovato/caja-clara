@@ -28,6 +28,10 @@ interface SaleDao {
     @Query("SELECT * FROM sales WHERE soldAt >= :startMillis AND soldAt < :endMillis ORDER BY soldAt DESC")
     fun observeBetween(startMillis: Long, endMillis: Long): Flow<List<SaleEntity>>
 
+    /** Total revenue across all sales ever (for the business account balance). */
+    @Query("SELECT COALESCE(SUM(totalRevenueCents), 0) FROM sales")
+    fun observeTotalRevenue(): Flow<Long>
+
     /** Total units sold (sum of line quantities) within the time window. */
     @Query(
         """

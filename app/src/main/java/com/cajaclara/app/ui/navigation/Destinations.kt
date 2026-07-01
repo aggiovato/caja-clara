@@ -21,6 +21,9 @@ object Routes {
 
     /** Register a purchase (restock/investment). */
     const val PURCHASE_FORM = "purchase_form"
+
+    /** User settings (global business variables). */
+    const val SETTINGS = "settings"
 }
 
 /** The four bottom-bar tabs, in display order. */

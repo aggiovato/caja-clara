@@ -1,6 +1,7 @@
 package com.cajaclara.app.feature.stats.domain.repository
 
 import com.cajaclara.app.core.date.DateRange
+import com.cajaclara.app.core.money.Money
 import com.cajaclara.app.feature.products.domain.valueobject.ProductId
 import com.cajaclara.app.feature.stats.domain.model.DailyBalance
 import com.cajaclara.app.feature.stats.domain.model.DailyCashPoint
@@ -24,6 +25,9 @@ interface AnalyticsRepository {
 
     /** Observe the daily cash-flow series (sales in vs purchases out) for an inclusive [range]. */
     fun observeCashFlow(range: DateRange): Flow<List<DailyCashPoint>>
+
+    /** Observe the business account balance: all sales revenue minus all purchase investment. */
+    fun observeAccountBalance(): Flow<Money>
 
     /** Observe a product's cost/price evolution over time. */
     fun observeProductPriceEvolution(productId: ProductId): Flow<List<ProductPricePoint>>

@@ -22,6 +22,7 @@ import com.cajaclara.app.feature.sales.domain.usecase.ObserveCashCloseUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.ObserveDailySalesUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.RegisterSaleUseCase
 import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
+import com.cajaclara.app.feature.stats.domain.usecase.ObserveAccountBalanceUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveCashFlowUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveDailyBalanceUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveSalesEvolutionUseCase
@@ -125,6 +126,10 @@ object UseCaseModule {
     @Provides
     fun provideObserveCashFlow(repository: AnalyticsRepository): ObserveCashFlowUseCase =
         ObserveCashFlowUseCase(repository)
+
+    @Provides
+    fun provideObserveAccountBalance(repository: AnalyticsRepository): ObserveAccountBalanceUseCase =
+        ObserveAccountBalanceUseCase(repository)
 
     @Provides
     fun provideRegisterPurchase(

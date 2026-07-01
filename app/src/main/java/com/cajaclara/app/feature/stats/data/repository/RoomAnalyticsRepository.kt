@@ -65,6 +65,11 @@ class RoomAnalyticsRepository @Inject constructor(
         }
     }
 
+    override fun observeAccountBalance(): Flow<Money> =
+        combine(saleDao.observeTotalRevenue(), purchaseDao.observeTotalInvestment()) { revenue, investment ->
+            Money(revenue - investment)
+        }
+
     override fun observeProductPriceEvolution(productId: ProductId): Flow<List<ProductPricePoint>> =
         priceHistoryDao.observeForProduct(productId.value).map { rows ->
             rows.map { row ->
