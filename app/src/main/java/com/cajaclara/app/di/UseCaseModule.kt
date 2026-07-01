@@ -17,12 +17,17 @@ import com.cajaclara.app.feature.purchases.domain.repository.PurchasesRepository
 import com.cajaclara.app.feature.purchases.domain.usecase.RegisterPurchaseUseCase
 import com.cajaclara.app.feature.sales.domain.repository.CashCloseRepository
 import com.cajaclara.app.feature.sales.domain.repository.SalesRepository
+import com.cajaclara.app.feature.settings.domain.repository.SettingsRepository
+import com.cajaclara.app.feature.settings.domain.usecase.ObserveSettingsUseCase
+import com.cajaclara.app.feature.settings.domain.usecase.UpdateMinMarginUseCase
+import com.cajaclara.app.feature.settings.domain.usecase.UpdateStoreAddressUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.CloseCashUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.ObserveCashCloseUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.ObserveDailySalesUseCase
 import com.cajaclara.app.feature.sales.domain.usecase.RegisterSaleUseCase
 import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveAccountBalanceUseCase
+import com.cajaclara.app.feature.stats.domain.usecase.ObserveBusinessInsightsUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveCashFlowUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveDailyBalanceUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveSalesEvolutionUseCase
@@ -51,16 +56,25 @@ object UseCaseModule {
         ObserveCategoriesUseCase(repository)
 
     @Provides
-    fun provideCreateProduct(repository: ProductRepository, clock: Clock): CreateProductUseCase =
-        CreateProductUseCase(repository, clock)
+    fun provideCreateProduct(
+        repository: ProductRepository,
+        settingsRepository: SettingsRepository,
+        clock: Clock,
+    ): CreateProductUseCase = CreateProductUseCase(repository, settingsRepository, clock)
 
     @Provides
-    fun provideUpdateProductCost(repository: ProductRepository, clock: Clock): UpdateProductCostUseCase =
-        UpdateProductCostUseCase(repository, clock)
+    fun provideUpdateProductCost(
+        repository: ProductRepository,
+        settingsRepository: SettingsRepository,
+        clock: Clock,
+    ): UpdateProductCostUseCase = UpdateProductCostUseCase(repository, settingsRepository, clock)
 
     @Provides
-    fun provideUpdateProductPvp(repository: ProductRepository, clock: Clock): UpdateProductPvpUseCase =
-        UpdateProductPvpUseCase(repository, clock)
+    fun provideUpdateProductPvp(
+        repository: ProductRepository,
+        settingsRepository: SettingsRepository,
+        clock: Clock,
+    ): UpdateProductPvpUseCase = UpdateProductPvpUseCase(repository, settingsRepository, clock)
 
     @Provides
     fun provideUpdateProduct(repository: ProductRepository, clock: Clock): UpdateProductUseCase =
@@ -132,6 +146,10 @@ object UseCaseModule {
         ObserveAccountBalanceUseCase(repository)
 
     @Provides
+    fun provideObserveBusinessInsights(repository: AnalyticsRepository): ObserveBusinessInsightsUseCase =
+        ObserveBusinessInsightsUseCase(repository)
+
+    @Provides
     fun provideRegisterPurchase(
         purchasesRepository: PurchasesRepository,
         productRepository: ProductRepository,
@@ -139,4 +157,16 @@ object UseCaseModule {
         clock: Clock,
     ): RegisterPurchaseUseCase =
         RegisterPurchaseUseCase(purchasesRepository, productRepository, stockRepository, clock)
+
+    @Provides
+    fun provideObserveSettings(repository: SettingsRepository): ObserveSettingsUseCase =
+        ObserveSettingsUseCase(repository)
+
+    @Provides
+    fun provideUpdateMinMargin(repository: SettingsRepository): UpdateMinMarginUseCase =
+        UpdateMinMarginUseCase(repository)
+
+    @Provides
+    fun provideUpdateStoreAddress(repository: SettingsRepository): UpdateStoreAddressUseCase =
+        UpdateStoreAddressUseCase(repository)
 }

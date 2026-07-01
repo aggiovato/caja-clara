@@ -32,6 +32,32 @@ interface SaleDao {
     @Query("SELECT COALESCE(SUM(totalRevenueCents), 0) FROM sales")
     fun observeTotalRevenue(): Flow<Long>
 
+    /** Total cost of goods sold across all sales ever. */
+    @Query("SELECT COALESCE(SUM(totalCostCents), 0) FROM sales")
+    fun observeTotalCost(): Flow<Long>
+
+    /** The best-selling product by units sold across all sales. */
+    @Query(
+        """
+        SELECT productNameSnapshot AS name,
+               SUM(quantity) AS units,
+               SUM((unitPvpCents - unitCostCents) * quantity) AS profitCents
+        FROM sale_lines GROUP BY productId ORDER BY units DESC LIMIT 1
+        """,
+    )
+    fun observeTopSelling(): Flow<ProductAggRow?>
+
+    /** The most profitable product by total profit generated across all sales. */
+    @Query(
+        """
+        SELECT productNameSnapshot AS name,
+               SUM(quantity) AS units,
+               SUM((unitPvpCents - unitCostCents) * quantity) AS profitCents
+        FROM sale_lines GROUP BY productId ORDER BY profitCents DESC LIMIT 1
+        """,
+    )
+    fun observeMostProfitable(): Flow<ProductAggRow?>
+
     /** Total units sold (sum of line quantities) within the time window. */
     @Query(
         """

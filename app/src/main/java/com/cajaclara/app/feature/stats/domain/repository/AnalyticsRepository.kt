@@ -3,6 +3,7 @@ package com.cajaclara.app.feature.stats.domain.repository
 import com.cajaclara.app.core.date.DateRange
 import com.cajaclara.app.core.money.Money
 import com.cajaclara.app.feature.products.domain.valueobject.ProductId
+import com.cajaclara.app.feature.stats.domain.model.BusinessInsights
 import com.cajaclara.app.feature.stats.domain.model.DailyBalance
 import com.cajaclara.app.feature.stats.domain.model.DailyCashPoint
 import com.cajaclara.app.feature.stats.domain.model.DailySalesPoint
@@ -28,6 +29,9 @@ interface AnalyticsRepository {
 
     /** Observe the business account balance: all sales revenue minus all purchase investment. */
     fun observeAccountBalance(): Flow<Money>
+
+    /** Observe business health insights: overall profitability and top products. */
+    fun observeBusinessInsights(): Flow<BusinessInsights>
 
     /** Observe a product's cost/price evolution over time. */
     fun observeProductPriceEvolution(productId: ProductId): Flow<List<ProductPricePoint>>

@@ -7,6 +7,7 @@ import com.cajaclara.app.feature.products.domain.usecase.ObserveProductsUseCase
 import com.cajaclara.app.feature.products.domain.valueobject.ProductFilter
 import com.cajaclara.app.feature.sales.domain.usecase.ObserveCashCloseUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveAccountBalanceUseCase
+import com.cajaclara.app.feature.stats.domain.usecase.ObserveBusinessInsightsUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveDailyBalanceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,6 +24,7 @@ class HomeViewModel @Inject constructor(
     observeDailyBalance: ObserveDailyBalanceUseCase,
     observeCashClose: ObserveCashCloseUseCase,
     observeProducts: ObserveProductsUseCase,
+    observeInsights: ObserveBusinessInsightsUseCase,
     clock: Clock,
 ) : ViewModel() {
 
@@ -34,7 +36,8 @@ class HomeViewModel @Inject constructor(
             observeDailyBalance(today),
             observeCashClose(today),
             observeProducts(ProductFilter.ALL),
-        ) { balance, daily, close, products ->
+            observeInsights(),
+        ) { balance, daily, close, products, insights ->
             HomeUiState(
                 accountBalance = balance,
                 today = daily,
@@ -43,6 +46,7 @@ class HomeViewModel @Inject constructor(
                 lowStockCount = products.count {
                     it.status == ProductStatus.ACTIVE && it.stockQuantity.value in 1..LOW_STOCK_THRESHOLD
                 },
+                insights = insights,
                 isLoading = false,
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())

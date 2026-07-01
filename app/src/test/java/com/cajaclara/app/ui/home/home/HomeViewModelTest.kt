@@ -11,12 +11,14 @@ import com.cajaclara.app.feature.products.domain.usecase.sampleProduct
 import com.cajaclara.app.feature.sales.domain.model.CashClose
 import com.cajaclara.app.feature.sales.domain.repository.CashCloseRepository
 import com.cajaclara.app.feature.sales.domain.usecase.ObserveCashCloseUseCase
+import com.cajaclara.app.feature.stats.domain.model.BusinessInsights
 import com.cajaclara.app.feature.stats.domain.model.DailyBalance
 import com.cajaclara.app.feature.stats.domain.model.DailyCashPoint
 import com.cajaclara.app.feature.stats.domain.model.DailySalesPoint
 import com.cajaclara.app.feature.stats.domain.model.ProductPricePoint
 import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveAccountBalanceUseCase
+import com.cajaclara.app.feature.stats.domain.usecase.ObserveBusinessInsightsUseCase
 import com.cajaclara.app.feature.stats.domain.usecase.ObserveDailyBalanceUseCase
 import com.cajaclara.app.feature.products.domain.valueobject.ProductId
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +45,7 @@ private class FakeAnalyticsRepository(private val balance: Money) : AnalyticsRep
     override fun observeSalesEvolution(range: DateRange): Flow<List<DailySalesPoint>> = flowOf(emptyList())
     override fun observeCashFlow(range: DateRange): Flow<List<DailyCashPoint>> = flowOf(emptyList())
     override fun observeAccountBalance(): Flow<Money> = flowOf(balance)
+    override fun observeBusinessInsights(): Flow<BusinessInsights> = flowOf(BusinessInsights.EMPTY)
     override fun observeProductPriceEvolution(productId: ProductId): Flow<List<ProductPricePoint>> = flowOf(emptyList())
 }
 
@@ -67,6 +70,7 @@ class HomeViewModelTest {
             observeDailyBalance = ObserveDailyBalanceUseCase(FakeAnalyticsRepository(balance)),
             observeCashClose = ObserveCashCloseUseCase(FakeCashCloseRepository(close)),
             observeProducts = ObserveProductsUseCase(repo),
+            observeInsights = ObserveBusinessInsightsUseCase(FakeAnalyticsRepository(balance)),
             clock = clock,
         )
     }

@@ -7,11 +7,14 @@ import com.cajaclara.app.feature.purchases.data.local.dao.PurchaseDao
 import com.cajaclara.app.feature.purchases.data.mapper.toDomain as purchaseToDomain
 import com.cajaclara.app.feature.sales.data.local.dao.SaleDao
 import com.cajaclara.app.feature.sales.data.mapper.toDomain
+import com.cajaclara.app.feature.sales.data.local.dao.ProductAggRow
 import com.cajaclara.app.feature.stats.domain.SalesAnalytics
+import com.cajaclara.app.feature.stats.domain.model.BusinessInsights
 import com.cajaclara.app.feature.stats.domain.model.DailyBalance
 import com.cajaclara.app.feature.stats.domain.model.DailyCashPoint
 import com.cajaclara.app.feature.stats.domain.model.DailySalesPoint
 import com.cajaclara.app.feature.stats.domain.model.ProductPricePoint
+import com.cajaclara.app.feature.stats.domain.model.TopProduct
 import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
 import com.cajaclara.app.core.money.Money
 import kotlinx.coroutines.flow.Flow
@@ -69,6 +72,23 @@ class RoomAnalyticsRepository @Inject constructor(
         combine(saleDao.observeTotalRevenue(), purchaseDao.observeTotalInvestment()) { revenue, investment ->
             Money(revenue - investment)
         }
+
+    override fun observeBusinessInsights(): Flow<BusinessInsights> =
+        combine(
+            saleDao.observeTotalRevenue(),
+            saleDao.observeTotalCost(),
+            saleDao.observeTopSelling(),
+            saleDao.observeMostProfitable(),
+        ) { revenue, cost, topSelling, mostProfitable ->
+            BusinessInsights(
+                profitabilityPercent = if (revenue > 0) (revenue - cost).toDouble() / revenue * 100.0 else null,
+                topSelling = topSelling?.toTopProduct(),
+                mostProfitable = mostProfitable?.toTopProduct(),
+            )
+        }
+
+    private fun ProductAggRow.toTopProduct(): TopProduct =
+        TopProduct(name = name, units = units, profit = Money(profitCents))
 
     override fun observeProductPriceEvolution(productId: ProductId): Flow<List<ProductPricePoint>> =
         priceHistoryDao.observeForProduct(productId.value).map { rows ->

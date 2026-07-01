@@ -33,7 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cajaclara.app.feature.stats.domain.model.BusinessInsights
 import com.cajaclara.app.feature.stats.domain.model.DailyBalance
+import com.cajaclara.app.feature.stats.domain.model.TopProduct
 import com.cajaclara.app.ui.designsystem.AppCard
 import com.cajaclara.app.ui.designsystem.AppMoneyText
 import com.cajaclara.app.ui.preview.DarkPreview
@@ -100,6 +102,7 @@ private fun HomeScreen(
             AccountCard(state.accountBalance)
             state.today?.let { TodayCard(it, state.isCashClosed) }
             if (state.hasStockAlerts) StockAlerts(state.soldOutCount, state.lowStockCount)
+            if (state.hasInsights) InsightsCard(state.insights)
 
             Text("Acciones", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -185,6 +188,63 @@ private fun StockAlerts(soldOut: Int, lowStock: Int) {
 }
 
 @Composable
+private fun InsightsCard(insights: BusinessInsights) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("Rentabilidad del negocio", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+
+            insights.profitabilityPercent?.let { pct ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column {
+                        Text("Margen medio", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(sustainabilityHint(pct), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Text(
+                        "${"%.0f".format(pct)}%",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        color = if (pct <= 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
+                    )
+                }
+            }
+
+            insights.topSelling?.let { TopProductRow("Más vendido", it, showUnits = true) }
+            insights.mostProfitable?.let { TopProductRow("Más rentable", it, showUnits = false) }
+        }
+    }
+}
+
+@Composable
+private fun TopProductRow(label: String, product: TopProduct, showUnits: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(product.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, maxLines = 1)
+        }
+        if (showUnits) {
+            Text("${product.units} uds.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+        } else {
+            AppMoneyText(product.profit, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+        }
+    }
+}
+
+/** A short reading of the business margin for the shopkeeper. */
+private fun sustainabilityHint(pct: Double): String = when {
+    pct <= 0 -> "Estás vendiendo con pérdida"
+    pct < 15 -> "Margen ajustado"
+    pct < 35 -> "Rentabilidad saludable"
+    else -> "Rentabilidad alta"
+}
+
+@Composable
 private fun QuickAction(label: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
     AppCard(modifier = modifier, onClick = onClick) {
         Column(
@@ -218,6 +278,11 @@ private fun HomeScreenPreview() {
                 isCashClosed = false,
                 soldOutCount = 2,
                 lowStockCount = 3,
+                insights = BusinessInsights(
+                    profitabilityPercent = 28.0,
+                    topSelling = TopProduct("Café molido", units = 42, profit = Money.fromPesos("60,00")),
+                    mostProfitable = TopProduct("Agua 1.5L", units = 30, profit = Money.fromPesos("90,00")),
+                ),
                 isLoading = false,
             ),
             onNewSale = {},
