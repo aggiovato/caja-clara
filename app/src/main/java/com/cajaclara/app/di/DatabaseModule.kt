@@ -10,6 +10,7 @@ import com.cajaclara.app.feature.products.data.local.dao.ProductDao
 import com.cajaclara.app.feature.purchases.data.local.dao.PurchaseDao
 import com.cajaclara.app.feature.sales.data.local.dao.CashCloseDao
 import com.cajaclara.app.feature.sales.data.local.dao.SaleDao
+import com.cajaclara.app.feature.settings.data.local.dao.SettingsDao
 import com.cajaclara.app.feature.stock.data.local.dao.StockMovementDao
 import dagger.Module
 import dagger.Provides
@@ -54,4 +55,7 @@ object DatabaseModule {
 
     @Provides
     fun providePurchaseDao(db: AppDatabase): PurchaseDao = db.purchaseDao()
+
+    @Provides
+    fun provideSettingsDao(db: AppDatabase): SettingsDao = db.settingsDao()
 }

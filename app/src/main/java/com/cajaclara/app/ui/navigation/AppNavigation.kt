@@ -26,12 +26,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cajaclara.app.ui.designsystem.AppBackground
-import com.cajaclara.app.ui.designsystem.AppEmptyState
 import com.cajaclara.app.ui.home.home.HomeScreen
 import com.cajaclara.app.ui.products.productform.ProductFormScreen
-import com.cajaclara.app.ui.sales.sales.SalesScreen
 import com.cajaclara.app.ui.products.products.ProductsScreen
 import com.cajaclara.app.ui.purchases.purchaseform.PurchaseFormScreen
+import com.cajaclara.app.ui.sales.sales.SalesScreen
+import com.cajaclara.app.ui.settings.settings.SettingsScreen
 import com.cajaclara.app.ui.stats.stats.StatsScreen
 
 /**
@@ -131,7 +131,7 @@ fun AppNavigation() {
                 PurchaseFormScreen(onDone = { navController.popBackStack() })
             }
             composable(Routes.SETTINGS) {
-                AppEmptyState(title = "Configuración", subtitle = "Próximamente")
+                SettingsScreen(onBack = { navController.popBackStack() })
             }
         }
     }

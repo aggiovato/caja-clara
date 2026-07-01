@@ -1,7 +1,9 @@
 package com.cajaclara.app.di
 
 import com.cajaclara.app.feature.products.data.AndroidImageStore
+import com.cajaclara.app.feature.products.data.AndroidShareImageStore
 import com.cajaclara.app.feature.products.data.ImageStore
+import com.cajaclara.app.feature.products.data.ShareImageStore
 import com.cajaclara.app.feature.products.data.repository.RoomCategoryRepository
 import com.cajaclara.app.feature.products.data.repository.RoomProductRepository
 import com.cajaclara.app.feature.products.domain.repository.CategoryRepository
@@ -12,6 +14,8 @@ import com.cajaclara.app.feature.sales.data.repository.RoomCashCloseRepository
 import com.cajaclara.app.feature.sales.data.repository.RoomSalesRepository
 import com.cajaclara.app.feature.sales.domain.repository.CashCloseRepository
 import com.cajaclara.app.feature.sales.domain.repository.SalesRepository
+import com.cajaclara.app.feature.settings.data.repository.RoomSettingsRepository
+import com.cajaclara.app.feature.settings.domain.repository.SettingsRepository
 import com.cajaclara.app.feature.stats.data.repository.RoomAnalyticsRepository
 import com.cajaclara.app.feature.stats.domain.repository.AnalyticsRepository
 import com.cajaclara.app.feature.stock.data.repository.RoomStockRepository
@@ -41,6 +45,10 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindShareImageStore(impl: AndroidShareImageStore): ShareImageStore
+
+    @Binds
+    @Singleton
     abstract fun bindStockRepository(impl: RoomStockRepository): StockRepository
 
     @Binds
@@ -58,4 +66,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPurchasesRepository(impl: RoomPurchasesRepository): PurchasesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(impl: RoomSettingsRepository): SettingsRepository
 }

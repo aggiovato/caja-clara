@@ -12,6 +12,8 @@ import com.cajaclara.app.feature.purchases.data.local.dao.PurchaseDao
 import com.cajaclara.app.feature.purchases.data.local.entity.PurchaseEntity
 import com.cajaclara.app.feature.purchases.data.local.entity.PurchaseLineEntity
 import com.cajaclara.app.feature.sales.data.local.dao.CashCloseDao
+import com.cajaclara.app.feature.settings.data.local.dao.SettingsDao
+import com.cajaclara.app.feature.settings.data.local.entity.SettingsEntity
 import com.cajaclara.app.feature.sales.data.local.dao.SaleDao
 import com.cajaclara.app.feature.sales.data.local.entity.CashCloseEntity
 import com.cajaclara.app.feature.sales.data.local.entity.SaleEntity
@@ -38,8 +40,9 @@ import com.cajaclara.app.feature.stock.data.local.entity.StockMovementEntity
         CashCloseEntity::class,
         PurchaseEntity::class,
         PurchaseLineEntity::class,
+        SettingsEntity::class,
     ],
-    version = 6,
+    version = 8,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -50,4 +53,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun saleDao(): SaleDao
     abstract fun cashCloseDao(): CashCloseDao
     abstract fun purchaseDao(): PurchaseDao
+    abstract fun settingsDao(): SettingsDao
 }
