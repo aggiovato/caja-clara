@@ -16,7 +16,17 @@ class CreateProductUseCaseTest {
     private val now = Instant.parse("2026-06-28T10:00:00Z")
     private val clock = Clock.fixed(now, ZoneOffset.UTC)
     private val repo = FakeProductRepository()
-    private val create = CreateProductUseCase(repo, clock)
+    private val create = CreateProductUseCase(repo, FakeSettingsRepository(), clock)
+
+    @Test
+    fun `rejects a product below the minimum margin`() = runTest {
+        // Min margin 10%. Cost 20,00 / PVP 22,00 -> margin ~9% -> rejected.
+        val useCase = CreateProductUseCase(repo, FakeSettingsRepository(minMarginPercent = 10.0), clock)
+        assertThrowsOf<MinMarginViolationException> {
+            useCase(NewProduct(name = "Café", cost = Money.fromPesos("20,00"), pvp = Money.fromPesos("22,00"), stock = Quantity(1)))
+        }
+        assertEquals(0, repo.stored.size)
+    }
 
     @Test
     fun `creates an active product with timestamps and trimmed name`() = runTest {

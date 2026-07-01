@@ -1,18 +1,22 @@
 package com.cajaclara.app.ui.products.productform
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import com.cajaclara.app.core.money.Money
 import com.cajaclara.app.feature.products.data.CameraTarget
 import com.cajaclara.app.feature.products.data.ImageStore
+import com.cajaclara.app.feature.products.data.ShareImageStore
 import com.cajaclara.app.feature.products.domain.model.Category
 import com.cajaclara.app.feature.products.domain.repository.CategoryRepository
 import com.cajaclara.app.feature.products.domain.usecase.ArchiveProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.CreateProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.FakeProductRepository
+import com.cajaclara.app.feature.products.domain.usecase.FakeSettingsRepository
 import com.cajaclara.app.feature.products.domain.usecase.GetProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.ObserveCategoriesUseCase
 import com.cajaclara.app.feature.products.domain.usecase.PauseProductUseCase
+import com.cajaclara.app.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.cajaclara.app.feature.products.domain.usecase.ResumeProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.SuggestSkuUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductCostUseCase
@@ -53,6 +57,10 @@ private class FakeImageStore : ImageStore {
     override fun newCameraTarget(): CameraTarget = throw UnsupportedOperationException()
 }
 
+private class FakeShareImageStore : ShareImageStore {
+    override suspend fun saveShareable(bitmap: Bitmap): Uri = throw UnsupportedOperationException()
+}
+
 private class FakeStockRepository : StockRepository {
     override suspend fun record(movement: StockMovement) {}
     override fun observeMovements(productId: ProductId) = flowOf(emptyList<StockMovement>())
@@ -75,18 +83,20 @@ class ProductFormViewModelTest {
     )
 
     private fun viewModel() = ProductFormViewModel(
-        createProduct = CreateProductUseCase(productRepo, clock),
+        createProduct = CreateProductUseCase(productRepo, FakeSettingsRepository(), clock),
         getProduct = GetProductUseCase(productRepo),
         updateProduct = UpdateProductUseCase(productRepo, clock),
-        updateCost = UpdateProductCostUseCase(productRepo, clock),
-        updatePvp = UpdateProductPvpUseCase(productRepo, clock),
+        updateCost = UpdateProductCostUseCase(productRepo, FakeSettingsRepository(), clock),
+        updatePvp = UpdateProductPvpUseCase(productRepo, FakeSettingsRepository(), clock),
         pauseProduct = PauseProductUseCase(productRepo, clock),
         resumeProduct = ResumeProductUseCase(productRepo, clock),
         archiveProduct = ArchiveProductUseCase(productRepo, clock),
         adjustStock = AdjustStockUseCase(productRepo, FakeStockRepository(), clock),
         suggestSku = SuggestSkuUseCase(),
         observeCategories = ObserveCategoriesUseCase(FakeCategoryRepository(categories)),
+        observeSettings = ObserveSettingsUseCase(FakeSettingsRepository()),
         imageStore = FakeImageStore(),
+        shareImageStore = FakeShareImageStore(),
         savedStateHandle = SavedStateHandle(),
     )
 

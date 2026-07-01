@@ -15,7 +15,7 @@ class UpdateProductPvpUseCaseTest {
     private val now = Instant.parse("2026-06-28T10:00:00Z")
     private val clock = Clock.fixed(now, ZoneOffset.UTC)
     private val repo = FakeProductRepository()
-    private val updatePvp = UpdateProductPvpUseCase(repo, clock)
+    private val updatePvp = UpdateProductPvpUseCase(repo, FakeSettingsRepository(), clock)
 
     private fun seed(cost: Money, pvp: Money): ProductId =
         repo.seed(sampleProduct(cost = cost, pvp = pvp))

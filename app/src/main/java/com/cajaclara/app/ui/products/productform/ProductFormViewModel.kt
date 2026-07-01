@@ -1,5 +1,6 @@
 package com.cajaclara.app.ui.products.productform
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -8,11 +9,13 @@ import com.cajaclara.app.core.money.Money
 import com.cajaclara.app.core.quantity.Quantity
 import com.cajaclara.app.feature.products.data.CameraTarget
 import com.cajaclara.app.feature.products.data.ImageStore
+import com.cajaclara.app.feature.products.data.ShareImageStore
 import com.cajaclara.app.feature.products.domain.model.Category
 import com.cajaclara.app.feature.products.domain.model.ProductStatus
 import com.cajaclara.app.feature.products.domain.usecase.ArchiveProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.CreateProductUseCase
 import com.cajaclara.app.feature.products.domain.usecase.GetProductUseCase
+import com.cajaclara.app.feature.products.domain.usecase.MinMarginViolationException
 import com.cajaclara.app.feature.products.domain.usecase.NewProduct
 import com.cajaclara.app.feature.products.domain.usecase.ObserveCategoriesUseCase
 import com.cajaclara.app.feature.products.domain.usecase.PauseProductUseCase
@@ -24,6 +27,7 @@ import com.cajaclara.app.feature.products.domain.usecase.UpdateProductPvpUseCase
 import com.cajaclara.app.feature.products.domain.usecase.UpdateProductUseCase
 import com.cajaclara.app.feature.products.domain.valueobject.CategoryId
 import com.cajaclara.app.feature.products.domain.valueobject.ProductId
+import com.cajaclara.app.feature.settings.domain.usecase.ObserveSettingsUseCase
 import com.cajaclara.app.feature.stock.domain.usecase.AdjustStockUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -48,7 +52,9 @@ class ProductFormViewModel @Inject constructor(
     private val adjustStock: AdjustStockUseCase,
     private val suggestSku: SuggestSkuUseCase,
     observeCategories: ObserveCategoriesUseCase,
+    observeSettings: ObserveSettingsUseCase,
     private val imageStore: ImageStore,
+    private val shareImageStore: ShareImageStore,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -76,6 +82,11 @@ class ProductFormViewModel @Inject constructor(
                     s.copy(categories = categories, selectedCategory = selected)
                 }
             }
+            .launchIn(viewModelScope)
+
+        // Keep the shop address in state so the shareable image can show it.
+        observeSettings()
+            .onEach { settings -> _state.update { it.copy(storeAddress = settings.storeAddress) } }
             .launchIn(viewModelScope)
     }
 
@@ -135,6 +146,17 @@ class ProductFormViewModel @Inject constructor(
     fun onRemoveImage() = _state.update { it.copy(imagePath = null) }
 
     fun onErrorShown() = _state.update { it.copy(error = null) }
+
+    /** Persist the captured shareable image to cache; exposes its URI for the share intent. */
+    fun shareProductImage(bitmap: Bitmap) {
+        viewModelScope.launch {
+            runCatching { shareImageStore.saveShareable(bitmap) }
+                .onSuccess { uri -> _state.update { it.copy(shareImageUri = uri) } }
+                .onFailure { e -> _state.update { it.copy(error = e.message ?: "No se pudo generar la imagen") } }
+        }
+    }
+
+    fun onShareHandled() = _state.update { it.copy(shareImageUri = null) }
 
     /** Save: create a new product, or update the general fields of the one being edited. */
     fun save(
@@ -229,7 +251,14 @@ class ProductFormViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { action(id, money) }
                 .onSuccess { reload() }
-                .onFailure { e -> _state.update { it.copy(error = e.message ?: "No se pudo guardar") } }
+                .onFailure { e ->
+                    val msg = when (e) {
+                        is MinMarginViolationException ->
+                            "El margen quedaría por debajo del mínimo (${e.minPercent.toInt()}%)"
+                        else -> e.message ?: "No se pudo guardar"
+                    }
+                    _state.update { it.copy(error = msg) }
+                }
         }
     }
 
@@ -269,7 +298,14 @@ class ProductFormViewModel @Inject constructor(
             _state.update { it.copy(isSaving = true, error = null) }
             runCatching { block() }
                 .onSuccess { _state.update { it.copy(isSaving = false, saved = true) } }
-                .onFailure { e -> _state.update { it.copy(isSaving = false, error = e.message ?: "No se pudo guardar") } }
+                .onFailure { e ->
+                    val msg = when (e) {
+                        is MinMarginViolationException ->
+                            "El margen (mín. ${e.minPercent.toInt()}%) no se cumple con este coste y PVP"
+                        else -> e.message ?: "No se pudo guardar"
+                    }
+                    _state.update { it.copy(isSaving = false, error = msg) }
+                }
         }
     }
 

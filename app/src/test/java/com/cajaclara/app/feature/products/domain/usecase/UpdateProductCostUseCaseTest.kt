@@ -14,7 +14,7 @@ class UpdateProductCostUseCaseTest {
     private val now = Instant.parse("2026-06-28T10:00:00Z")
     private val clock = Clock.fixed(now, ZoneOffset.UTC)
     private val repo = FakeProductRepository()
-    private val updateCost = UpdateProductCostUseCase(repo, clock)
+    private val updateCost = UpdateProductCostUseCase(repo, FakeSettingsRepository(), clock)
 
     private fun seed(cost: Money, pvp: Money): ProductId =
         repo.seed(sampleProduct(cost = cost, pvp = pvp))
@@ -58,5 +58,26 @@ class UpdateProductCostUseCaseTest {
         assertThrowsOf<NoSuchElementException> {
             updateCost(ProductId(999), Money.fromPesos("5,00"))
         }
+    }
+
+    @Test
+    fun `rejects a cost that breaks the minimum margin`() = runTest {
+        // Min margin 40% over price. PVP 10,00 -> cost must keep margin >= 40% (cost <= 6,00).
+        val useCase = UpdateProductCostUseCase(repo, FakeSettingsRepository(minMarginPercent = 40.0), clock)
+        val id = seed(cost = Money.fromPesos("4,00"), pvp = Money.fromPesos("10,00"))
+
+        // 8,00 cost -> margin 20% < 40% -> rejected, nothing written.
+        assertThrowsOf<MinMarginViolationException> { useCase(id, Money.fromPesos("8,00")) }
+        assertEquals(0, repo.priceHistory.size)
+        assertEquals(Money.fromPesos("4,00"), repo.getProduct(id)!!.currentCost)
+    }
+
+    @Test
+    fun `allows a cost that keeps the minimum margin`() = runTest {
+        val useCase = UpdateProductCostUseCase(repo, FakeSettingsRepository(minMarginPercent = 40.0), clock)
+        val id = seed(cost = Money.fromPesos("4,00"), pvp = Money.fromPesos("10,00"))
+
+        useCase(id, Money.fromPesos("5,00")) // margin 50% >= 40%
+        assertEquals(Money.fromPesos("5,00"), repo.getProduct(id)!!.currentCost)
     }
 }
