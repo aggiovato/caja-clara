@@ -2,10 +2,12 @@ package com.cajaclara.app.ui.purchases.purchaseform
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -48,6 +50,9 @@ import com.cajaclara.app.ui.designsystem.AppLoadingState
 import com.cajaclara.app.ui.designsystem.AppMoneyText
 import com.cajaclara.app.ui.designsystem.AppPrimaryButton
 import com.cajaclara.app.ui.designsystem.AppSearchField
+import com.cajaclara.app.ui.designsystem.AppSnackbarHost
+import com.cajaclara.app.ui.designsystem.showMessage
+import kotlinx.coroutines.launch
 import com.cajaclara.app.ui.preview.DarkPreview
 import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.preview.PreviewSamples
@@ -88,14 +93,20 @@ private fun PurchaseFormScreen(
     onBack: () -> Unit,
 ) {
     val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     var adding by remember { mutableStateOf<Product?>(null) }
-    LaunchedEffect(state.error) { state.error?.let { snackbar.showSnackbar(it); onErrorShown() } }
+    // Clear the one-shot error immediately, then show the toast independently (see SalesScreen).
+    LaunchedEffect(state.error) {
+        state.error?.let { msg ->
+            onErrorShown()
+            scope.launch { snackbar.showMessage(msg, isError = true) }
+        }
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text("Registrar compra") },
@@ -110,7 +121,8 @@ private fun PurchaseFormScreen(
         },
         bottomBar = { if (state.hasItems) InvestmentBar(state, onConfirm) },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxWidth()) {
+        Box(Modifier.padding(padding).fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             AppSearchField(
                 state = queryState,
                 placeholder = "Buscar producto",
@@ -138,6 +150,8 @@ private fun PurchaseFormScreen(
                     }
                 }
             }
+        }
+        AppSnackbarHost(snackbar, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
         }
     }
 

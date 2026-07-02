@@ -1,6 +1,7 @@
 package com.cajaclara.app.ui.settings.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -26,7 +26,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -36,7 +38,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cajaclara.app.ui.designsystem.AppCard
 import com.cajaclara.app.ui.designsystem.AppPrimaryButton
+import com.cajaclara.app.ui.designsystem.AppSnackbarHost
 import com.cajaclara.app.ui.designsystem.AppTextField
+import com.cajaclara.app.ui.designsystem.showMessage
+import kotlinx.coroutines.launch
 import com.cajaclara.app.ui.preview.DarkPreview
 import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.theme.CajaClaraTheme
@@ -81,15 +86,21 @@ private fun SettingsScreen(
     onBack: () -> Unit,
 ) {
     val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    // Clear the one-shot message immediately, then show the toast independently (see SalesScreen).
     LaunchedEffect(state.savedMessage, state.error) {
-        (state.error ?: state.savedMessage)?.let { snackbar.showSnackbar(it); onMessageShown() }
+        val err = state.error
+        val msg = err ?: state.savedMessage
+        if (msg != null) {
+            onMessageShown()
+            scope.launch { snackbar.showMessage(msg, isError = err != null) }
+        }
     }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text("Configuración") },
@@ -103,8 +114,9 @@ private fun SettingsScreen(
             )
         },
     ) { padding ->
+        Box(Modifier.padding(padding).fillMaxSize()) {
         Column(
-            modifier = Modifier.padding(padding).fillMaxSize().padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AppCard(modifier = Modifier.fillMaxWidth()) {
@@ -146,6 +158,8 @@ private fun SettingsScreen(
                     AppPrimaryButton(text = "Guardar", onClick = onSaveAddress, modifier = Modifier.fillMaxWidth())
                 }
             }
+        }
+        AppSnackbarHost(snackbar, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
         }
     }
 }

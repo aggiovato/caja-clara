@@ -22,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,8 +33,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +49,8 @@ import com.cajaclara.app.ui.designsystem.AppLoadingState
 import com.cajaclara.app.ui.designsystem.AppMoneyText
 import com.cajaclara.app.ui.designsystem.AppPrimaryButton
 import com.cajaclara.app.ui.designsystem.AppSearchField
+import com.cajaclara.app.ui.designsystem.AppSnackbarHost
+import com.cajaclara.app.ui.designsystem.showMessage
 import com.cajaclara.app.ui.preview.DarkPreview
 import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.preview.PreviewSamples
@@ -92,19 +95,27 @@ private fun SalesScreen(
     onRegisterPurchase: () -> Unit,
 ) {
     val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
+    // Clear the one-shot flag immediately and show the toast in an independent scope, so leaving
+    // the screen mid-toast can't leave the flag set (which made the toast reappear on return).
     LaunchedEffect(state.error) {
-        state.error?.let { snackbar.showSnackbar(it); onErrorShown() }
+        state.error?.let { msg ->
+            onErrorShown()
+            scope.launch { snackbar.showMessage(msg, isError = true) }
+        }
     }
     LaunchedEffect(state.justSold) {
-        if (state.justSold) { snackbar.showSnackbar("Venta registrada"); onSoldShown() }
+        if (state.justSold) {
+            onSoldShown()
+            scope.launch { snackbar.showMessage("Venta registrada") }
+        }
     }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text("Ventas") },
@@ -162,6 +173,9 @@ private fun SalesScreen(
             ) {
                 Icon(Icons.AutoMirrored.Filled.ReceiptLong, contentDescription = "Ventas de hoy")
             }
+
+            // Toasts float at the top, away from the bottom action buttons.
+            AppSnackbarHost(snackbar, modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
         }
     }
 

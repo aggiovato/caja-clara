@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -32,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -67,11 +69,12 @@ import com.cajaclara.app.feature.products.domain.model.ProductStatus
 import com.cajaclara.app.feature.products.domain.valueobject.CategoryId
 import com.cajaclara.app.ui.designsystem.AppConfirmDialog
 import com.cajaclara.app.ui.designsystem.AppDropdownField
-import com.cajaclara.app.ui.designsystem.AppErrorBanner
 import com.cajaclara.app.ui.designsystem.AppIconButton
 import com.cajaclara.app.ui.designsystem.AppPrimaryButton
 import com.cajaclara.app.ui.designsystem.AppSecondaryButton
+import com.cajaclara.app.ui.designsystem.AppSnackbarHost
 import com.cajaclara.app.ui.designsystem.AppTextField
+import com.cajaclara.app.ui.designsystem.showMessage
 import com.cajaclara.app.ui.preview.DarkPreview
 import com.cajaclara.app.ui.preview.LightPreview
 import com.cajaclara.app.ui.products.categoryIcon
@@ -155,6 +158,7 @@ fun ProductFormScreen(
         onArchive = viewModel::archive,
         onShare = viewModel::shareProductImage,
         onShareHandled = viewModel::onShareHandled,
+        onErrorShown = viewModel::onErrorShown,
         onCancel = onDone,
         onSave = {
             viewModel.save(
@@ -190,6 +194,7 @@ private fun ProductFormContent(
     onArchive: () -> Unit,
     onShare: (Bitmap) -> Unit,
     onShareHandled: () -> Unit,
+    onErrorShown: () -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
 ) {
@@ -197,6 +202,17 @@ private fun ProductFormContent(
     var showPauseConfirm by remember { mutableStateOf(false) }
     var showArchiveConfirm by remember { mutableStateOf(false) }
     var showShareSheet by remember { mutableStateOf(false) }
+
+    // Validation errors surface as a top toast (not an inline banner) so they never push the
+    // Cancel/Save buttons around. Clear the flag first so it can't get stuck (see SalesScreen).
+    val snackbar = remember { SnackbarHostState() }
+    val toastScope = rememberCoroutineScope()
+    LaunchedEffect(state.error) {
+        state.error?.let { msg ->
+            onErrorShown()
+            toastScope.launch { snackbar.showMessage(msg, isError = true) }
+        }
+    }
 
     // When the shareable image is ready, fire the share intent and reset the one-shot signal.
     val context = LocalContext.current
@@ -235,9 +251,9 @@ private fun ProductFormContent(
             )
         },
     ) { padding ->
+        Box(Modifier.padding(padding).fillMaxSize()) {
         Column(
             modifier = Modifier
-                .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
@@ -309,8 +325,6 @@ private fun ProductFormContent(
             )
             AppTextField(description, label = "Descripción (opcional)", singleLine = false, minLines = 4)
 
-            state.error?.let { AppErrorBanner(it) }
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -318,6 +332,8 @@ private fun ProductFormContent(
                 AppSecondaryButton("Cancelar", onCancel, Modifier.weight(1f))
                 AppPrimaryButton("Guardar", onSave, Modifier.weight(1f), enabled = !state.isSaving)
             }
+        }
+        AppSnackbarHost(snackbar, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
         }
     }
 
@@ -475,6 +491,7 @@ private fun ProductFormScreenPreview() {
             onArchive = {},
             onShare = {},
             onShareHandled = {},
+            onErrorShown = {},
             onCancel = {},
             onSave = {},
         )
